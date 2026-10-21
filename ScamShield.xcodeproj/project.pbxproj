@@ -6,8 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		DF03BCE73088AEA60062CA71 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = DF03BCE63088AE9E0062CA71 /* .gitignore */; };
+		DF86D7AA3088E287003102C6 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = DF86D7A93088E287003102C6 /* FirebaseAuth */; };
+		DF86D7AC3088E287003102C6 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = DF86D7AB3088E287003102C6 /* FirebaseFirestore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		DF03BCD83088ACBB0062CA71 /* ScamShield.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScamShield.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DF03BCE63088AE9E0062CA71 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		DF8BD1203088BE8100D1C484 /* ScanResultTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanResultTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -23,6 +31,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DF86D7AA3088E287003102C6 /* FirebaseAuth in Frameworks */,
+				DF86D7AC3088E287003102C6 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -32,7 +42,10 @@
 		DF03BCCF3088ACBB0062CA71 = {
 			isa = PBXGroup;
 			children = (
+				DF03BCE63088AE9E0062CA71 /* .gitignore */,
+				DF8BD11F3088BD8200D1C484 /* ScamShieldTests */,
 				DF03BCDA3088ACBB0062CA71 /* ScamShield */,
+				DF86D7A73088E137003102C6 /* Frameworks */,
 				DF03BCD93088ACBB0062CA71 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +56,21 @@
 				DF03BCD83088ACBB0062CA71 /* ScamShield.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		DF86D7A73088E137003102C6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DF8BD11F3088BD8200D1C484 /* ScamShieldTests */ = {
+			isa = PBXGroup;
+			children = (
+				DF8BD1203088BE8100D1C484 /* ScanResultTests.swift */,
+			);
+			path = ScamShieldTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -65,6 +93,8 @@
 			);
 			name = ScamShield;
 			packageProductDependencies = (
+				DF86D7A93088E287003102C6 /* FirebaseAuth */,
+				DF86D7AB3088E287003102C6 /* FirebaseFirestore */,
 			);
 			productName = ScamShield;
 			productReference = DF03BCD83088ACBB0062CA71 /* ScamShield.app */;
@@ -94,6 +124,9 @@
 			);
 			mainGroup = DF03BCCF3088ACBB0062CA71;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				DF86D7A83088E287003102C6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DF03BCD93088ACBB0062CA71 /* Products */;
 			projectDirPath = "";
@@ -109,6 +142,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DF03BCE73088AEA60062CA71 /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,6 +292,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -289,6 +324,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -328,6 +364,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DF86D7A83088E287003102C6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.15.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DF86D7A93088E287003102C6 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DF86D7A83088E287003102C6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		DF86D7AB3088E287003102C6 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DF86D7A83088E287003102C6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DF03BCD03088ACBB0062CA71 /* Project object */;
 }
