@@ -9,14 +9,23 @@ import SwiftUI
 
 struct ContentView: View {
 
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @State private var auth = AuthViewModel()
+
+    //decides the first screen: onboarding, then login, then the main app
     var body: some View {
-        VStack {
-            Image(systemName: "shield.lefthalf.filled")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("ScamShield")
+        Group {
+            if !hasSeenOnboarding {
+                OnboardingView { hasSeenOnboarding = true }
+            } else if auth.isSignedIn {
+                MainTabView()
+            } else {
+                AuthView()
+            }
         }
-        .padding()
+        .environment(auth)
+        .animation(.default, value: hasSeenOnboarding)
+        .animation(.default, value: auth.isSignedIn)
     }
 }
 
