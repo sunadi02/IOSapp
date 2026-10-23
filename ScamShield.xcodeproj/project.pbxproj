@@ -12,16 +12,44 @@
 		DF86D7AC3088E287003102C6 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = DF86D7AB3088E287003102C6 /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		DF6622D5308B4E2A00129F8B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DF03BCD03088ACBB0062CA71 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DF03BCD73088ACBB0062CA71;
+			remoteInfo = ScamShield;
+		};
+		DFB2C48C308B4A9800A555AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DF03BCD03088ACBB0062CA71 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DF03BCD73088ACBB0062CA71;
+			remoteInfo = ScamShield;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		DF03BCD83088ACBB0062CA71 /* ScamShield.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScamShield.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF03BCE63088AE9E0062CA71 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		DF8BD1203088BE8100D1C484 /* ScanResultTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanResultTests.swift; sourceTree = "<group>"; };
+		DF6622D1308B4E2A00129F8B /* ScamShieldTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScamShieldTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DFB2C486308B4A9800A555AC /* ScamShieldUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScamShieldUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		DF03BCDA3088ACBB0062CA71 /* ScamShield */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = ScamShield;
+			sourceTree = "<group>";
+		};
+		DF6622D2308B4E2A00129F8B /* ScamShieldTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ScamShieldTests;
+			sourceTree = "<group>";
+		};
+		DFB2C487308B4A9800A555AC /* ScamShieldUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ScamShieldUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -36,6 +64,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DF6622CE308B4E2A00129F8B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DFB2C483308B4A9800A555AC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -43,8 +85,9 @@
 			isa = PBXGroup;
 			children = (
 				DF03BCE63088AE9E0062CA71 /* .gitignore */,
-				DF8BD11F3088BD8200D1C484 /* ScamShieldTests */,
 				DF03BCDA3088ACBB0062CA71 /* ScamShield */,
+				DFB2C487308B4A9800A555AC /* ScamShieldUITests */,
+				DF6622D2308B4E2A00129F8B /* ScamShieldTests */,
 				DF86D7A73088E137003102C6 /* Frameworks */,
 				DF03BCD93088ACBB0062CA71 /* Products */,
 			);
@@ -54,6 +97,8 @@
 			isa = PBXGroup;
 			children = (
 				DF03BCD83088ACBB0062CA71 /* ScamShield.app */,
+				DFB2C486308B4A9800A555AC /* ScamShieldUITests.xctest */,
+				DF6622D1308B4E2A00129F8B /* ScamShieldTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -63,14 +108,6 @@
 			children = (
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		DF8BD11F3088BD8200D1C484 /* ScamShieldTests */ = {
-			isa = PBXGroup;
-			children = (
-				DF8BD1203088BE8100D1C484 /* ScanResultTests.swift */,
-			);
-			path = ScamShieldTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -100,6 +137,52 @@
 			productReference = DF03BCD83088ACBB0062CA71 /* ScamShield.app */;
 			productType = "com.apple.product-type.application";
 		};
+		DF6622D0308B4E2A00129F8B /* ScamShieldTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DF6622D9308B4E2A00129F8B /* Build configuration list for PBXNativeTarget "ScamShieldTests" */;
+			buildPhases = (
+				DF6622CD308B4E2A00129F8B /* Sources */,
+				DF6622CE308B4E2A00129F8B /* Frameworks */,
+				DF6622CF308B4E2A00129F8B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DF6622D6308B4E2A00129F8B /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				DF6622D2308B4E2A00129F8B /* ScamShieldTests */,
+			);
+			name = ScamShieldTests;
+			packageProductDependencies = (
+			);
+			productName = ScamShieldTests;
+			productReference = DF6622D1308B4E2A00129F8B /* ScamShieldTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		DFB2C485308B4A9800A555AC /* ScamShieldUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DFB2C490308B4A9800A555AC /* Build configuration list for PBXNativeTarget "ScamShieldUITests" */;
+			buildPhases = (
+				DFB2C482308B4A9800A555AC /* Sources */,
+				DFB2C483308B4A9800A555AC /* Frameworks */,
+				DFB2C484308B4A9800A555AC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DFB2C48D308B4A9800A555AC /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				DFB2C487308B4A9800A555AC /* ScamShieldUITests */,
+			);
+			name = ScamShieldUITests;
+			packageProductDependencies = (
+			);
+			productName = ScamShieldUITests;
+			productReference = DFB2C486308B4A9800A555AC /* ScamShieldUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -112,6 +195,14 @@
 				TargetAttributes = {
 					DF03BCD73088ACBB0062CA71 = {
 						CreatedOnToolsVersion = 26.2;
+					};
+					DF6622D0308B4E2A00129F8B = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = DF03BCD73088ACBB0062CA71;
+					};
+					DFB2C485308B4A9800A555AC = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = DF03BCD73088ACBB0062CA71;
 					};
 				};
 			};
@@ -133,6 +224,8 @@
 			projectRoot = "";
 			targets = (
 				DF03BCD73088ACBB0062CA71 /* ScamShield */,
+				DFB2C485308B4A9800A555AC /* ScamShieldUITests */,
+				DF6622D0308B4E2A00129F8B /* ScamShieldTests */,
 			);
 		};
 /* End PBXProject section */
@@ -146,6 +239,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DF6622CF308B4E2A00129F8B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DFB2C484308B4A9800A555AC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -156,7 +263,34 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DF6622CD308B4E2A00129F8B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DFB2C482308B4A9800A555AC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DF6622D6308B4E2A00129F8B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DF03BCD73088ACBB0062CA71 /* ScamShield */;
+			targetProxy = DF6622D5308B4E2A00129F8B /* PBXContainerItemProxy */;
+		};
+		DFB2C48D308B4A9800A555AC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DF03BCD73088ACBB0062CA71 /* ScamShield */;
+			targetProxy = DFB2C48C308B4A9800A555AC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		DF03BCE13088ACBC0062CA71 /* Debug */ = {
@@ -342,6 +476,84 @@
 			};
 			name = Release;
 		};
+		DF6622D7308B4E2A00129F8B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = sunadi.ScamShieldTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ScamShield.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ScamShield";
+			};
+			name = Debug;
+		};
+		DF6622D8308B4E2A00129F8B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = sunadi.ScamShieldTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ScamShield.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ScamShield";
+			};
+			name = Release;
+		};
+		DFB2C48E308B4A9800A555AC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = sunadi.ScamShieldUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ScamShield;
+			};
+			name = Debug;
+		};
+		DFB2C48F308B4A9800A555AC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = sunadi.ScamShieldUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ScamShield;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -359,6 +571,24 @@
 			buildConfigurations = (
 				DF03BCE43088ACBC0062CA71 /* Debug */,
 				DF03BCE53088ACBC0062CA71 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DF6622D9308B4E2A00129F8B /* Build configuration list for PBXNativeTarget "ScamShieldTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DF6622D7308B4E2A00129F8B /* Debug */,
+				DF6622D8308B4E2A00129F8B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DFB2C490308B4A9800A555AC /* Build configuration list for PBXNativeTarget "ScamShieldUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DFB2C48E308B4A9800A555AC /* Debug */,
+				DFB2C48F308B4A9800A555AC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

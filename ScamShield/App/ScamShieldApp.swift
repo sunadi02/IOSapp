@@ -11,6 +11,7 @@ import FirebaseCore
 @main
 struct ScamShieldApp: App {
 
+    //firebase must be configured once before any auth or firestore call
     init() {
         FirebaseApp.configure()
     }
