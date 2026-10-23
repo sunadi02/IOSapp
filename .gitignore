@@ -6,3 +6,4 @@ build/
 .build/
 *.ipa
 GoogleService-Info.plist
+Secrets.plist
