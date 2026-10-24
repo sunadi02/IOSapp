@@ -11,6 +11,7 @@ import FirebaseCore
 @main
 struct ScamShieldApp: App {
 
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
     @State private var services = AppServices()
 

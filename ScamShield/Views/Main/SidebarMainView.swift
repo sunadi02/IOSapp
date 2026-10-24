@@ -46,6 +46,7 @@ struct SidebarMainView: View {
             }
             .id(selection)
         }
+        .handlesQuickActions(selection: $selection)
     }
 
     private func row(_ section: AppSection) -> some View {
