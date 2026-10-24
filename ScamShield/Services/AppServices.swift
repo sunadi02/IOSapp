@@ -19,19 +19,24 @@ final class AppServices {
     let sync: HistorySyncService
     let router: NotificationRouter
     let network: NetworkMonitor
+    let searchIndex: SearchIndexing
 
-    @ObservationIgnored private let notificationDelegate = NotificationDelegate()
+    private let history: HistoryStoring
+    private let notificationDelegate = NotificationDelegate()
     @ObservationIgnored private var authListener: NSObjectProtocol?
 
     init(
         notifications: NotificationScheduling = NotificationService(),
         history: HistoryStoring = AppHistory.store,
         sync: HistorySyncService = AppHistory.sync,
-        network: NetworkMonitor = NetworkMonitor()
+        network: NetworkMonitor = NetworkMonitor(),
+        searchIndex: SearchIndexing = SpotlightIndexer()
     ) {
         self.notifications = notifications
+        self.history = history
         self.sync = sync
         self.network = network
+        self.searchIndex = searchIndex
         recheck = RecheckService(history: history, notifications: notifications)
         router = NotificationRouter(history: history)
 
@@ -52,10 +57,12 @@ final class AppServices {
         network.start()
         guard authListener == nil else { return }
 
-        authListener = Auth.auth().addStateDidChangeListener { [sync] _, user in
+        authListener = Auth.auth().addStateDidChangeListener { [sync, searchIndex] _, user in
             Task { @MainActor in
                 if user == nil {
                     sync.didSignOut()
+                    //the next person to sign in on this device must not find the last one's scans in search
+                    searchIndex.removeAll()
                 } else {
                     await sync.sync()
                 }
@@ -66,5 +73,10 @@ final class AppServices {
     func appBecameActive() async {
         await sync.sync()
         await recheck.run()
+
+        //scans pulled from other devices are added to search here
+        if let scans = try? history.fetchAll() {
+            searchIndex.replaceAll(with: scans)
+        }
     }
 }

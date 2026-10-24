@@ -18,8 +18,8 @@ final class NetworkMonitor {
     //called once each time the connection returns after being lost
     @ObservationIgnored var onReconnect: (() -> Void)?
 
-    @ObservationIgnored private let monitor: NWPathMonitor
-    @ObservationIgnored private let queue = DispatchQueue(label: "com.scamshield.network")
+    private let monitor: NWPathMonitor
+    private let queue = DispatchQueue(label: "com.scamshield.network")
     @ObservationIgnored private var isStarted = false
 
     init(monitor: NWPathMonitor = NWPathMonitor()) {

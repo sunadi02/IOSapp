@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreSpotlight
 
 //picks the sidebar or the tab bar from the window width, so rotating an iPad or resizing it keeps the same section open
 struct AdaptiveMainView: View {
@@ -13,6 +14,7 @@ struct AdaptiveMainView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(AppServices.self) private var services
+    @Environment(AppLockViewModel.self) private var lock
     @AppStorage(AppSettings.alertsEnabled) private var alertsEnabled = true
     @State private var selection: AppSection = .home
 
@@ -44,7 +46,14 @@ struct AdaptiveMainView: View {
         .task {
             if alertsEnabled { _ = await services.notifications.requestPermission() }
         }
-        .sheet(item: $router.openedScan) { scan in
+        //tapping a scan in iOS search opens its result, the same way a scam alert does
+        .onContinueUserActivity(CSSearchableItemActionType) { activity in
+            guard let identifier = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String,
+                  let id = UUID(uuidString: identifier) else { return }
+            services.router.open(id: id)
+        }
+        //a result opened from outside waits until the app is unlocked, so it never shows on top of the lock screen
+        .sheet(item: lock.isLocked ? .constant(nil) : $router.openedScan) { scan in
             NavigationStack {
                 ResultView(result: scan)
                     .toolbar {

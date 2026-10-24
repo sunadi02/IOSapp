@@ -13,9 +13,11 @@ struct SyncedHistoryStore: HistoryStoring {
 
     let local: HistoryStoring
     let sync: HistorySyncService
+    var searchIndex: SearchIndexing?
 
     func save(_ result: ScanResult) throws {
         try local.save(result)
+        searchIndex?.index([result])
         Task { await sync.push() }
     }
 
@@ -33,6 +35,7 @@ struct SyncedHistoryStore: HistoryStoring {
 
     func delete(id: UUID) throws {
         try local.delete(id: id)
+        searchIndex?.remove(ids: [id])
         sync.queueDeletes([id])
         Task { await sync.push() }
     }
@@ -40,6 +43,7 @@ struct SyncedHistoryStore: HistoryStoring {
     func deleteAll() throws {
         let ids = try local.fetchAll().map(\.id)
         try local.deleteAll()
+        searchIndex?.removeAll()
         sync.queueDeletes(ids)
         Task { await sync.push() }
     }
@@ -54,5 +58,9 @@ enum AppHistory {
         currentUserID: { Auth.auth().currentUser?.uid }
     )
 
-    static let store: HistoryStoring = SyncedHistoryStore(local: CoreDataHistoryRepository(), sync: sync)
+    static let store: HistoryStoring = SyncedHistoryStore(
+        local: CoreDataHistoryRepository(),
+        sync: sync,
+        searchIndex: SpotlightIndexer()
+    )
 }
