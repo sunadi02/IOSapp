@@ -63,6 +63,16 @@ struct SettingsView: View {
             }
 
             Section {
+                NavigationLink {
+                    SMSFilterSetupView()
+                } label: {
+                    Label("SMS Scam Filter", systemImage: "message.fill")
+                }
+            } header: {
+                Text("Protection")
+            }
+
+            Section {
                 Button("Clear Scan History", systemImage: "trash", role: .destructive) {
                     isConfirmingClear = true
                 }
