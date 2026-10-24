@@ -9,41 +9,6 @@ import Testing
 import Foundation
 @testable import ScamShield
 
-//fake auth service that records calls and can be told to fail
-final class MockAuthService: AuthServicing {
-    var currentUser: AppUser?
-    var errorToThrow: Error?
-    private(set) var signInCalls = 0
-    private(set) var resetEmails: [String] = []
-    private(set) var updatedNames: [String] = []
-
-    func signIn(email: String, password: String) async throws -> AppUser {
-        signInCalls += 1
-        if let errorToThrow { throw errorToThrow }
-        return AppUser(id: "1", email: email, displayName: nil)
-    }
-
-    func signUp(name: String, email: String, password: String) async throws -> AppUser {
-        if let errorToThrow { throw errorToThrow }
-        return AppUser(id: "1", email: email, displayName: name)
-    }
-
-    func sendPasswordReset(email: String) async throws {
-        if let errorToThrow { throw errorToThrow }
-        resetEmails.append(email)
-    }
-
-    func updateDisplayName(_ name: String) async throws -> AppUser {
-        if let errorToThrow { throw errorToThrow }
-        updatedNames.append(name)
-        return AppUser(id: "1", email: "user@example.com", displayName: name)
-    }
-
-    func signOut() throws {
-        if let errorToThrow { throw errorToThrow }
-    }
-}
-
 @MainActor
 struct AuthViewModelTests {
 
@@ -149,6 +114,70 @@ struct AuthViewModelTests {
             try await viewModel.updateName("New Name")
         }
         #expect(viewModel.user?.displayName == nil)
+    }
+
+    @Test func signUpCreatesTheAccountWithATrimmedName() async {
+        let viewModel = makeViewModel()
+        viewModel.mode = .signUp
+        viewModel.name = "  Sunadi Amarasinghe "
+        await viewModel.submit()
+
+        #expect(viewModel.user?.displayName == "Sunadi Amarasinghe")
+        #expect(viewModel.isSignedIn)
+    }
+
+    @Test func signUpWithABadEmailStopsBeforeCallingFirebase() async {
+        let viewModel = makeViewModel(email: "not an email")
+        viewModel.mode = .signUp
+        viewModel.name = "Sunadi"
+        await viewModel.submit()
+
+        #expect(viewModel.errorMessage == "Please enter a valid email address.")
+        #expect(!viewModel.isSignedIn)
+    }
+
+    @Test func passwordResetFailureShowsAFriendlyMessage() async {
+        service.errorToThrow = AuthError.network
+        let viewModel = makeViewModel()
+        await viewModel.resetPassword()
+
+        #expect(viewModel.errorMessage == "No internet connection. Please try again.")
+        #expect(viewModel.infoMessage == nil)
+    }
+
+    @Test func signOutFailureKeepsYouSignedInAndSaysSo() async {
+        let viewModel = makeViewModel()
+        await viewModel.submit()
+        service.errorToThrow = AuthError.unknown
+
+        viewModel.signOut()
+        #expect(viewModel.isSignedIn)
+        #expect(viewModel.errorMessage == "Could not sign out. Please try again.")
+    }
+
+    @Test func signingOutReturnsTheFormToSignIn() async {
+        let viewModel = makeViewModel()
+        await viewModel.submit()
+        viewModel.mode = .signUp
+
+        viewModel.signOut()
+        #expect(viewModel.mode == .signIn)
+    }
+
+    @Test func fixingAMistakeClearsTheOldMessage() async {
+        let viewModel = makeViewModel(password: "123")
+        await viewModel.submit()
+        #expect(viewModel.errorMessage != nil)
+
+        viewModel.password = "secret123"
+        await viewModel.submit()
+        #expect(viewModel.errorMessage == nil)
+        #expect(viewModel.isSignedIn)
+    }
+
+    @Test func signedOutStateHasNoUser() {
+        #expect(AuthViewModel(service: service).user == nil)
+        #expect(!AuthViewModel(service: service).isSignedIn)
     }
 
     @Test func nonFirebaseErrorMapsToUnknown() {

@@ -28,6 +28,8 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES"
+      codeCoverageEnabled = "YES"
+      onlyGenerateCoverageForSpecifiedTargets = "YES"
       shouldAutocreateTestPlan = "YES">
       <Testables>
          <TestableReference
@@ -53,6 +55,15 @@
             </BuildableReference>
          </TestableReference>
       </Testables>
+      <CodeCoverageTargets>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "DF03BCD73088ACBB0062CA71"
+            BuildableName = "ScamShield.app"
+            BlueprintName = "ScamShield"
+            ReferencedContainer = "container:ScamShield.xcodeproj">
+         </BuildableReference>
+      </CodeCoverageTargets>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"

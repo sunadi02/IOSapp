@@ -9,18 +9,6 @@ import Testing
 import Foundation
 @testable import ScamShield
 
-//store that always fails so error handling can be tested
-struct FailingHistoryStore: HistoryStoring {
-    struct StoreError: Error {}
-
-    func save(_ result: ScanResult) throws { throw StoreError() }
-    func fetchAll() throws -> [ScanResult] { throw StoreError() }
-    func fetchUnsynced() throws -> [ScanResult] { throw StoreError() }
-    func markSynced(ids: [UUID]) throws { throw StoreError() }
-    func delete(id: UUID) throws { throw StoreError() }
-    func deleteAll() throws { throw StoreError() }
-}
-
 @MainActor
 struct HistoryViewModelTests {
 

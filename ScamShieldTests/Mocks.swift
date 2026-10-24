@@ -9,6 +9,146 @@ import AVFoundation
 import Foundation
 @testable import ScamShield
 
+//every fake used by more than one test file lives here, so a test only needs to name what it fakes
+
+//fake safe browsing checker so tests never call the real api
+struct MockReputationChecker: LinkReputationChecking {
+    var foundThreats: [String] = []
+    var error: Error?
+
+    func threats(for url: URL) async throws -> [String] {
+        if let error { throw error }
+        return foundThreats
+    }
+}
+
+//fake auth service that records calls and can be told to fail
+final class MockAuthService: AuthServicing {
+    var currentUser: AppUser?
+    var errorToThrow: Error?
+    private(set) var signInCalls = 0
+    private(set) var resetEmails: [String] = []
+    private(set) var updatedNames: [String] = []
+
+    func signIn(email: String, password: String) async throws -> AppUser {
+        signInCalls += 1
+        if let errorToThrow { throw errorToThrow }
+        return AppUser(id: "1", email: email, displayName: nil)
+    }
+
+    func signUp(name: String, email: String, password: String) async throws -> AppUser {
+        if let errorToThrow { throw errorToThrow }
+        return AppUser(id: "1", email: email, displayName: name)
+    }
+
+    func sendPasswordReset(email: String) async throws {
+        if let errorToThrow { throw errorToThrow }
+        resetEmails.append(email)
+    }
+
+    func updateDisplayName(_ name: String) async throws -> AppUser {
+        if let errorToThrow { throw errorToThrow }
+        updatedNames.append(name)
+        return AppUser(id: "1", email: "user@example.com", displayName: name)
+    }
+
+    func signOut() throws {
+        if let errorToThrow { throw errorToThrow }
+    }
+}
+
+//store that always fails so error handling can be tested
+struct FailingHistoryStore: HistoryStoring {
+    struct StoreError: Error {}
+
+    func save(_ result: ScanResult) throws { throw StoreError() }
+    func fetchAll() throws -> [ScanResult] { throw StoreError() }
+    func fetchUnsynced() throws -> [ScanResult] { throw StoreError() }
+    func markSynced(ids: [UUID]) throws { throw StoreError() }
+    func delete(id: UUID) throws { throw StoreError() }
+    func deleteAll() throws { throw StoreError() }
+}
+
+//fake face id so tests never show a real prompt
+@MainActor
+final class MockBiometricAuthenticator: BiometricAuthenticating {
+    var kind: BiometricKind = .faceID
+    var result: Result<Void, BiometricError> = .success(())
+    private(set) var attempts = 0
+
+    func authenticate(reason: String) async throws {
+        attempts += 1
+        try result.get()
+    }
+}
+
+//answers web requests from a closure so the networking code can be tested without the internet
+//each test registers its own id, which the service sends as its api key, so tests running side by side never meet
+final class StubURLProtocol: URLProtocol {
+
+    typealias Handler = (URLRequest) throws -> (status: Int, body: Data)
+
+    private static let lock = NSLock()
+    nonisolated(unsafe) private static var handlers: [String: Handler] = [:]
+
+    static func register(id: String, handler: @escaping Handler) {
+        lock.lock()
+        defer { lock.unlock() }
+        handlers[id] = handler
+    }
+
+    private static func handler(for id: String) -> Handler? {
+        lock.lock()
+        defer { lock.unlock() }
+        return handlers[id]
+    }
+
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+    override func startLoading() {
+        guard let url = request.url,
+              let id = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "key" })?.value,
+              let handler = Self.handler(for: id) else {
+            client?.urlProtocol(self, didFailWithError: URLError(.badURL))
+            return
+        }
+
+        do {
+            let answer = try handler(request)
+            let response = HTTPURLResponse(url: url, statusCode: answer.status, httpVersion: nil, headerFields: nil)!
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: answer.body)
+            client?.urlProtocolDidFinishLoading(self)
+        } catch {
+            client?.urlProtocol(self, didFailWithError: error)
+        }
+    }
+
+    override func stopLoading() {}
+}
+
+extension URLRequest {
+
+    //url loading turns a request body into a stream, so it has to be read back out
+    func readBody() -> Data? {
+        if let httpBody { return httpBody }
+        guard let stream = httpBodyStream else { return nil }
+
+        stream.open()
+        defer { stream.close() }
+
+        var data = Data()
+        var buffer = [UInt8](repeating: 0, count: 1024)
+        while stream.hasBytesAvailable {
+            let count = stream.read(&buffer, maxLength: buffer.count)
+            if count <= 0 { break }
+            data.append(buffer, count: count)
+        }
+        return data
+    }
+}
+
 //records alerts instead of showing real notifications
 @MainActor
 final class MockNotifier: NotificationScheduling {

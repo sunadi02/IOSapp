@@ -9,17 +9,6 @@ import Testing
 import Foundation
 @testable import ScamShield
 
-//fake safe browsing checker so tests never call the real api
-struct MockReputationChecker: LinkReputationChecking {
-    var foundThreats: [String] = []
-    var error: Error?
-
-    func threats(for url: URL) async throws -> [String] {
-        if let error { throw error }
-        return foundThreats
-    }
-}
-
 @MainActor
 struct LinkScannerTests {
 

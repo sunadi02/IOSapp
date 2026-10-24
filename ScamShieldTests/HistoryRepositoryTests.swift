@@ -67,6 +67,58 @@ struct HistoryRepositoryTests {
         #expect(try repository.fetchAll().count == 1)
     }
 
+    @Test func newScansStartUnsynced() throws {
+        let result = makeResult()
+        try repository.save(result)
+        #expect(try repository.fetchUnsynced() == [result])
+    }
+
+    @Test func markingSyncedTakesThemOffTheUnsyncedList() throws {
+        let result = makeResult()
+        try repository.save(result)
+
+        try repository.markSynced(ids: [result.id])
+        #expect(try repository.fetchUnsynced().isEmpty)
+        #expect(try repository.fetchAll() == [result])
+    }
+
+    @Test func markingOneScanLeavesTheOthersUnsynced() throws {
+        let first = makeResult(input: "a.com")
+        let second = makeResult(input: "b.com")
+        try repository.save(first)
+        try repository.save(second)
+
+        try repository.markSynced(ids: [first.id])
+        #expect(try repository.fetchUnsynced().map(\.id) == [second.id])
+    }
+
+    @Test func savingASyncedScanAgainMakesItUnsyncedAgain() throws {
+        let result = makeResult()
+        try repository.save(result)
+        try repository.markSynced(ids: [result.id])
+
+        try repository.save(result)
+        #expect(try repository.fetchUnsynced().count == 1)
+    }
+
+    @Test func unsyncedScansComeOldestFirst() throws {
+        let older = makeResult(input: "old.com", date: Date(timeIntervalSinceNow: -3600))
+        let newer = makeResult(input: "new.com")
+        try repository.save(newer)
+        try repository.save(older)
+
+        #expect(try repository.fetchUnsynced().map(\.input) == ["old.com", "new.com"])
+    }
+
+    @Test func markingNothingOrUnknownScansChangesNothing() throws {
+        let result = makeResult()
+        try repository.save(result)
+
+        try repository.markSynced(ids: [])
+        try repository.markSynced(ids: [UUID()])
+        #expect(try repository.fetchUnsynced().count == 1)
+    }
+
     @Test func deleteAllClearsHistory() throws {
         try repository.save(makeResult(input: "a.com"))
         try repository.save(makeResult(input: "b.com"))

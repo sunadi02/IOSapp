@@ -10,19 +10,6 @@ import Foundation
 import LocalAuthentication
 @testable import ScamShield
 
-//fake face id so tests never show a real prompt
-@MainActor
-final class MockBiometricAuthenticator: BiometricAuthenticating {
-    var kind: BiometricKind = .faceID
-    var result: Result<Void, BiometricError> = .success(())
-    private(set) var attempts = 0
-
-    func authenticate(reason: String) async throws {
-        attempts += 1
-        try result.get()
-    }
-}
-
 @MainActor
 struct AppLockViewModelTests {
 
