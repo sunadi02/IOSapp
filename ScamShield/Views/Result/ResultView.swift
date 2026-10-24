@@ -11,7 +11,14 @@ struct ResultView: View {
 
     let result: ScanResult
 
+    //only a scan that has just finished vibrates, opening an old one from history stays quiet
+    var isNewScan = false
+
+    @AppStorage(AppSettings.hapticsEnabled) private var hapticsEnabled = true
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isReporting = false
+    @State private var feedbackTrigger = 0
+    @State private var iconBounce = 0
 
     private var canReport: Bool {
         result.type != .screenshot && URLAnalyzer.normalize(result.input) != nil
@@ -69,6 +76,11 @@ struct ResultView: View {
         .sheet(isPresented: $isReporting) {
             ReportSheet(scan: result)
         }
+        .sensoryFeedback(result.riskLevel.haptic.feedback, trigger: feedbackTrigger)
+        .onAppear {
+            if isNewScan && hapticsEnabled { feedbackTrigger += 1 }
+            if !reduceMotion { iconBounce += 1 }
+        }
     }
 
     private var summary: some View {
@@ -78,6 +90,7 @@ struct ResultView: View {
             Label(result.riskLevel.title, systemImage: result.riskLevel.systemImage)
                 .font(.title2.bold())
                 .foregroundStyle(result.riskLevel.color)
+                .symbolEffect(.bounce, value: iconBounce)
 
             Text(result.riskLevel.advice)
                 .font(.subheadline)

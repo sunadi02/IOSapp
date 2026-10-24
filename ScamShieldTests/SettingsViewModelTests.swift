@@ -76,7 +76,12 @@ struct SettingsViewModelTests {
     }
 
     @Test func settingsKeysAreUnique() {
-        let keys = [AppSettings.hasSeenOnboarding, AppSettings.appLockEnabled, AppSettings.alertsEnabled]
+        let keys = [
+            AppSettings.hasSeenOnboarding,
+            AppSettings.appLockEnabled,
+            AppSettings.alertsEnabled,
+            AppSettings.hapticsEnabled
+        ]
         #expect(Set(keys).count == keys.count)
     }
 }

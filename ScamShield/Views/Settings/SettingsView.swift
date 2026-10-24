@@ -13,6 +13,7 @@ struct SettingsView: View {
     @Environment(AppLockViewModel.self) private var lock
     @Environment(AppServices.self) private var services
     @AppStorage(AppSettings.alertsEnabled) private var alertsEnabled = true
+    @AppStorage(AppSettings.hapticsEnabled) private var hapticsEnabled = true
     @State private var viewModel = SettingsViewModel()
     @State private var isEditingName = false
     @State private var isConfirmingClear = false
@@ -49,6 +50,14 @@ struct SettingsView: View {
                 Text("Notifications")
             } footer: {
                 Text(viewModel.alertsMessage ?? "Get notified if a link you checked earlier is later reported as a scam.")
+            }
+
+            Section {
+                Toggle("Haptic feedback", isOn: $hapticsEnabled)
+            } header: {
+                Text("Feedback")
+            } footer: {
+                Text("A short vibration tells you how a new scan turned out. Animations follow your Reduce Motion setting.")
             }
 
             Section {

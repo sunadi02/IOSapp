@@ -84,21 +84,42 @@ struct RiskBadge: View {
     }
 }
 
+extension ResultHaptic {
+
+    var feedback: SensoryFeedback {
+        switch self {
+        case .success: .success
+        case .warning: .warning
+        case .error: .error
+        }
+    }
+}
+
+//fills up and counts to the score when it appears, VoiceOver always hears the final score
 struct TrustScoreRing: View {
     let score: Int
     let color: Color
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var shownScore: Int?
+
+    private var displayedScore: Int {
+        shownScore ?? ResultMotion.startingScore(for: score, reduceMotion: reduceMotion)
+    }
 
     var body: some View {
         ZStack {
             Circle()
                 .stroke(color.opacity(0.2), lineWidth: 10)
             Circle()
-                .trim(from: 0, to: CGFloat(score) / 100)
+                .trim(from: 0, to: CGFloat(displayedScore) / 100)
                 .stroke(color, style: StrokeStyle(lineWidth: 10, lineCap: .round))
                 .rotationEffect(.degrees(-90))
             VStack(spacing: 0) {
-                Text("\(score)")
+                Text("\(displayedScore)")
                     .font(.title.bold())
+                    .monospacedDigit()
+                    .contentTransition(.numericText(value: Double(displayedScore)))
                 Text("/ 100")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -107,5 +128,17 @@ struct TrustScoreRing: View {
         .frame(width: 96, height: 96)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Trust score \(score) out of 100")
+        .onAppear { reveal(score) }
+        .onChange(of: score) { _, newScore in reveal(newScore) }
+    }
+
+    private func reveal(_ target: Int) {
+        if reduceMotion {
+            shownScore = target
+        } else {
+            withAnimation(.easeOut(duration: ResultMotion.duration(forScore: target))) {
+                shownScore = target
+            }
+        }
     }
 }

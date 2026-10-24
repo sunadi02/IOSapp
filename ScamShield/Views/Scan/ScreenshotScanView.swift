@@ -56,7 +56,7 @@ struct ScreenshotScanView: View {
         .navigationTitle("Scan a Screenshot")
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(item: $viewModel.result) { scan in
-            ResultView(result: scan)
+            ResultView(result: scan, isNewScan: true)
         }
         .onChange(of: selectedPhoto) { _, item in
             loadPhoto(item)

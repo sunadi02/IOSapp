@@ -68,7 +68,7 @@ struct CheckLinkView: View {
         }
         .navigationTitle("Check a Link")
         .navigationDestination(item: $viewModel.result) { result in
-            ResultView(result: result)
+            ResultView(result: result, isNewScan: true)
         }
     }
 

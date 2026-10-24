@@ -12,4 +12,5 @@ enum AppSettings {
     static let hasSeenOnboarding = "hasSeenOnboarding"
     static let appLockEnabled = "appLockEnabled"
     static let alertsEnabled = "alertsEnabled"
+    static let hapticsEnabled = "hapticsEnabled"
 }

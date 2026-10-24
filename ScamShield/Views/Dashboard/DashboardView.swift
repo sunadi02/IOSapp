@@ -112,6 +112,8 @@ struct StatCard: View {
     let systemImage: String
     let color: Color
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Image(systemName: systemImage)
@@ -120,6 +122,8 @@ struct StatCard: View {
                 .accessibilityHidden(true)
             Text("\(value)")
                 .font(.title.bold())
+                .contentTransition(.numericText(value: Double(value)))
+                .animation(reduceMotion ? nil : .default, value: value)
             Text(title)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)

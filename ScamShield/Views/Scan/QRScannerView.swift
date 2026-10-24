@@ -37,9 +37,9 @@ struct QRScannerView: View {
             }
         }
         .navigationDestination(item: $viewModel.result) { scan in
-            ResultView(result: scan)
+            ResultView(result: scan, isNewScan: true)
         }
-        .sensoryFeedback(.success, trigger: viewModel.result) { _, newValue in newValue != nil }
+        .sensoryFeedback(.impact(flexibility: .rigid), trigger: viewModel.result) { _, newValue in newValue != nil }
         .onAppear {
             viewModel.prepareToScan()
             Task { await viewModel.startCamera() }
