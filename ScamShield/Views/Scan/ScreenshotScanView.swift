@@ -55,6 +55,7 @@ struct ScreenshotScanView: View {
         }
         .navigationTitle("Scan a Screenshot")
         .navigationBarTitleDisplayMode(.inline)
+        .announceWhenSet(viewModel.errorMessage)
         .navigationDestination(item: $viewModel.result) { scan in
             ResultView(result: scan, isNewScan: true)
         }

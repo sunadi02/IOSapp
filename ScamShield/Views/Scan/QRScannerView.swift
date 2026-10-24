@@ -24,6 +24,7 @@ struct QRScannerView: View {
         }
         .navigationTitle("Scan QR Code")
         .navigationBarTitleDisplayMode(.inline)
+        .announceWhenSet(viewModel.errorMessage)
         .toolbar {
             if viewModel.cameraState == .scanning {
                 ToolbarItem(placement: .topBarTrailing) {

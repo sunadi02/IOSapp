@@ -64,6 +64,8 @@ struct CommunityView: View {
                 .padding(.vertical, 6)
                 .foregroundStyle(isSelected ? Color.white : Color.primary)
                 .background(isSelected ? Color.accentColor : Color(.secondarySystemFill), in: Capsule())
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .hoverEffect(.highlight)

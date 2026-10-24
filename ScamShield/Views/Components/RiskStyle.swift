@@ -102,6 +102,7 @@ struct TrustScoreRing: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var shownScore: Int?
+    @ScaledMetric(relativeTo: .title) private var size = 96
 
     private var displayedScore: Int {
         shownScore ?? ResultMotion.startingScore(for: score, reduceMotion: reduceMotion)
@@ -125,7 +126,7 @@ struct TrustScoreRing: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .frame(width: 96, height: 96)
+        .frame(width: size, height: size)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Trust score \(score) out of 100")
         .onAppear { reveal(score) }

@@ -24,6 +24,7 @@ struct CheckLinkView: View {
                     .focused($isInputFocused)
                     .onSubmit(runCheck)
                     .accessibilityLabel("Link to check")
+                    .accessibilityIdentifier(AccessibilityID.checkLinkInput)
 
                 PasteButton(payloadType: String.self) { strings in
                     viewModel.input = strings.first ?? ""
@@ -55,6 +56,7 @@ struct CheckLinkView: View {
                     }
                 }
                 .disabled(!viewModel.canCheck)
+                .accessibilityIdentifier(AccessibilityID.checkLinkSubmit)
             }
 
             Section("What ScamShield checks") {
@@ -67,6 +69,7 @@ struct CheckLinkView: View {
             .foregroundStyle(.secondary)
         }
         .navigationTitle("Check a Link")
+        .announceWhenSet(viewModel.errorMessage)
         .navigationDestination(item: $viewModel.result) { result in
             ResultView(result: result, isNewScan: true)
         }

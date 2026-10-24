@@ -19,6 +19,7 @@ struct OnboardingView: View {
     var onFinish: () -> Void
 
     @State private var currentPage = 0
+    @ScaledMetric(relativeTo: .largeTitle) private var iconSize = 80
 
     static let pages = [
         OnboardingPage(id: 0, systemImage: "link.badge.plus", title: "Check any link",
@@ -40,6 +41,7 @@ struct OnboardingView: View {
                 Button("Skip", action: onFinish)
                     .opacity(isLastPage ? 0 : 1)
                     .disabled(isLastPage)
+                    .accessibilityHidden(isLastPage)
             }
             .padding(.horizontal)
 
@@ -74,7 +76,7 @@ struct OnboardingView: View {
         VStack(spacing: 20) {
             Spacer()
             Image(systemName: page.systemImage)
-                .font(.system(size: 80))
+                .font(.system(size: iconSize))
                 .foregroundStyle(.tint)
                 .accessibilityHidden(true)
             Text(page.title)

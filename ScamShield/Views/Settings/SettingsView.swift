@@ -119,6 +119,7 @@ struct SettingsView: View {
                 Button("Sign Out", role: .destructive) {
                     isConfirmingSignOut = true
                 }
+                .accessibilityIdentifier(AccessibilityID.signOut)
             }
         }
         .navigationTitle("Settings")

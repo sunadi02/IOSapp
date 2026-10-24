@@ -58,6 +58,7 @@ struct EditNameView: View {
                 }
             }
             .interactiveDismissDisabled(isSaving)
+            .announceWhenSet(errorMessage)
             .onAppear { isNameFocused = true }
         }
     }

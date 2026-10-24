@@ -79,6 +79,7 @@ struct ResultView: View {
         .sensoryFeedback(result.riskLevel.haptic.feedback, trigger: feedbackTrigger)
         .onAppear {
             if isNewScan && hapticsEnabled { feedbackTrigger += 1 }
+            if isNewScan { AccessibilityNotification.Announcement(result.completionAnnouncement).post() }
             if !reduceMotion { iconBounce += 1 }
         }
     }

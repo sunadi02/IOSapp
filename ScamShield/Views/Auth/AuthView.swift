@@ -16,6 +16,7 @@ struct AuthView: View {
     }
 
     @FocusState private var focusedField: Field?
+    @ScaledMetric(relativeTo: .largeTitle) private var logoSize = 64
 
     var body: some View {
         @Bindable var auth = auth
@@ -45,11 +46,13 @@ struct AuthView: View {
                         .autocorrectionDisabled()
                         .focused($focusedField, equals: .email)
                         .submitLabel(.next)
+                        .accessibilityIdentifier(AccessibilityID.authEmail)
 
                     SecureField("Password", text: $auth.password)
                         .textContentType(auth.mode == .signUp ? .newPassword : .password)
                         .focused($focusedField, equals: .password)
                         .submitLabel(.go)
+                        .accessibilityIdentifier(AccessibilityID.authPassword)
                 }
                 .textFieldStyle(.roundedBorder)
                 .onSubmit(moveToNextField)
@@ -73,6 +76,7 @@ struct AuthView: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
                 .disabled(auth.isLoading)
+                .accessibilityIdentifier(AccessibilityID.authSubmit)
 
                 if auth.mode == .signIn {
                     Button("Forgot password?") {
@@ -88,12 +92,14 @@ struct AuthView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .animation(.default, value: auth.mode)
+        .announceWhenSet(auth.errorMessage)
+        .announceWhenSet(auth.infoMessage)
     }
 
     private var header: some View {
         VStack(spacing: 8) {
             Image(systemName: "shield.lefthalf.filled")
-                .font(.system(size: 64))
+                .font(.system(size: logoSize))
                 .foregroundStyle(.tint)
                 .accessibilityHidden(true)
             Text("ScamShield")

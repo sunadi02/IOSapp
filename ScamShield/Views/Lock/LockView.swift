@@ -11,11 +11,13 @@ struct LockView: View {
 
     let lock: AppLockViewModel
 
+    @ScaledMetric(relativeTo: .largeTitle) private var iconSize = 64
+
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
                 Image(systemName: "lock.shield.fill")
-                    .font(.system(size: 64))
+                    .font(.system(size: iconSize))
                     .foregroundStyle(.tint)
                     .accessibilityHidden(true)
 
