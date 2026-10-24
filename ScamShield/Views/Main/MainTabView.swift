@@ -50,4 +50,5 @@ struct MainTabView: View {
 #Preview {
     MainTabView()
         .environment(AuthViewModel(service: PreviewAuthService()))
+        .environment(AppLockViewModel())
 }
