@@ -64,6 +64,26 @@ struct HistorySyncServiceTests {
         #expect(remote.stored.count == 1)
     }
 
+    @Test func screenshotScansAreNeverUploaded() async throws {
+        let message = ScanResult(type: .screenshot, input: "private message text", riskLevel: .risky, trustScore: 10)
+        let link = scan("a.com")
+        try local.save(message)
+        try local.save(link)
+
+        await service.push()
+        #expect(remote.stored.map(\.id) == [link.id])
+        #expect(try local.fetchUnsynced().map(\.id) == [message.id])
+    }
+
+    @Test func screenshotScansSurviveASync() async throws {
+        let message = ScanResult(type: .screenshot, input: "private message text", riskLevel: .risky, trustScore: 10)
+        try local.save(message)
+        remote.stored = []
+
+        await service.sync()
+        #expect(try local.fetchAll().map(\.id) == [message.id])
+    }
+
     @Test func changedScanIsUploadedAgain() async throws {
         let original = scan("a.com")
         try local.save(original)

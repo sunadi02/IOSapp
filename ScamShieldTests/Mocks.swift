@@ -133,6 +133,17 @@ struct MockBarcodeDetector: BarcodeDetecting {
     func payloads(in pixelBuffer: CVPixelBuffer) throws -> [String] { found }
 }
 
+//hands back fixed text so no real screenshot is needed
+struct MockTextRecognizer: TextRecognizing {
+    var text = ""
+    var shouldFail = false
+
+    func recognizeText(inImageData data: Data) throws -> String {
+        if shouldFail { throw URLError(.cannotDecodeContentData) }
+        return text
+    }
+}
+
 //lets a test sign the user in and out after the service was created
 @MainActor
 final class SessionBox {

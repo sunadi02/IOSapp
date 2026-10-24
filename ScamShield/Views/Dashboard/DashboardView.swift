@@ -60,8 +60,11 @@ struct DashboardView: View {
                 QuickActionRow(title: "Scan a QR code", subtitle: "Check a code before you open it", systemImage: "qrcode.viewfinder")
             }
 
-            QuickActionRow(title: "Scan a screenshot", subtitle: "Coming soon", systemImage: "text.viewfinder")
-                .opacity(0.5)
+            NavigationLink {
+                ScreenshotScanView()
+            } label: {
+                QuickActionRow(title: "Scan a screenshot", subtitle: "Check a suspicious message", systemImage: "text.viewfinder")
+            }
         }
         .buttonStyle(.plain)
     }

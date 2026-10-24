@@ -122,11 +122,15 @@ final class HistorySyncService {
     }
 
     private func uploadUnsynced(userID: String) async {
-        guard let unsynced = try? local.fetchUnsynced(), !unsynced.isEmpty else { return }
+        guard let unsynced = try? local.fetchUnsynced() else { return }
+
+        //message text from screenshots stays on this device and is never uploaded
+        let shareable = unsynced.filter { $0.type != .screenshot }
+        guard !shareable.isEmpty else { return }
 
         do {
-            try await remote.upsert(unsynced, userID: userID)
-            try local.markSynced(ids: unsynced.map(\.id))
+            try await remote.upsert(shareable, userID: userID)
+            try local.markSynced(ids: shareable.map(\.id))
         } catch {
             return
         }

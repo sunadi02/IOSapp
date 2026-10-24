@@ -62,8 +62,10 @@ extension ScanType {
 }
 
 extension ScanResult {
+    //a message is private so sharing a result only mentions that a message was checked
     var shareText: String {
-        "ScamShield checked \(input)\nResult: \(riskLevel.title) (trust score \(trustScore)/100)"
+        let subject = type == .screenshot ? "a message" : input
+        return "ScamShield checked \(subject)\nResult: \(riskLevel.title) (trust score \(trustScore)/100)"
     }
 }
 

@@ -77,7 +77,7 @@ struct SettingsView: View {
             } header: {
                 Text("About")
             } footer: {
-                Text("Links are checked on your device first. Only the link address is sent to Google Safe Browsing. Your scan history is stored in your private ScamShield account so it syncs across your devices.")
+                Text("Links are checked on your device first. Only the link address is sent to Google Safe Browsing. Your link and QR history is stored in your private ScamShield account so it syncs across your devices. Screenshots and message text never leave this device.")
             }
 
             #if DEBUG

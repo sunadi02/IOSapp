@@ -23,10 +23,14 @@ struct ResultView: View {
                 summary
             }
 
-            Section("Checked") {
-                Text(result.input)
-                    .font(.callout.monospaced())
-                    .textSelection(.enabled)
+            Section(result.type == .screenshot ? "Message" : "Checked") {
+                if result.type == .screenshot {
+                    HighlightedMessage(text: result.input)
+                } else {
+                    Text(result.input)
+                        .font(.callout.monospaced())
+                        .textSelection(.enabled)
+                }
                 LabeledContent("Type", value: result.type.title)
                 LabeledContent("Date", value: result.date.formatted(date: .abbreviated, time: .shortened))
             }

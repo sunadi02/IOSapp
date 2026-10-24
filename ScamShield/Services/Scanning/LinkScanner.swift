@@ -18,6 +18,8 @@ enum LinkScanError: LocalizedError {
 //runs the on device checks and the google safe browsing check for one link
 struct LinkScanner {
 
+    static let onlineCheckUnavailableTitle = "Online check unavailable"
+
     let analyzer = URLAnalyzer()
     let reputation: LinkReputationChecking
     let community: CommunityReporting?
@@ -48,7 +50,7 @@ struct LinkScanner {
             }
         } catch {
             //still give an on device result when the api cannot be reached
-            signals.append(RiskSignal(title: "Online check unavailable", detail: "Could not reach Google Safe Browsing, so this result only uses on-device checks.", weight: 0))
+            signals.append(RiskSignal(title: Self.onlineCheckUnavailableTitle, detail: "Could not reach Google Safe Browsing, so this result only uses on-device checks.", weight: 0))
         }
 
         if let report = await communityReport, report.count > 0 {
