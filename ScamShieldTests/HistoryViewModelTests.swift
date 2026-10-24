@@ -9,6 +9,19 @@ import Testing
 import Foundation
 @testable import ScamShield
 
+//deletes like the real store but cannot save, to test a failed undo
+struct SaveFailingStore: HistoryStoring {
+    struct SaveError: Error {}
+    let base: HistoryStoring
+
+    func save(_ result: ScanResult) throws { throw SaveError() }
+    func fetchAll() throws -> [ScanResult] { try base.fetchAll() }
+    func fetchUnsynced() throws -> [ScanResult] { try base.fetchUnsynced() }
+    func markSynced(ids: [UUID]) throws { try base.markSynced(ids: ids) }
+    func delete(id: UUID) throws { try base.delete(id: id) }
+    func deleteAll() throws { try base.deleteAll() }
+}
+
 @MainActor
 struct HistoryViewModelTests {
 
@@ -234,6 +247,118 @@ struct HistoryViewModelTests {
 
         viewModel.searchText = "no match anywhere"
         #expect(viewModel.selectedScan?.id == scan.id)
+    }
+
+    @Test func nothingCanBeUndoneAtFirst() throws {
+        try save("a.com")
+        viewModel.load()
+        #expect(viewModel.undoMessage == nil)
+    }
+
+    @Test func deletingAScanOffersUndo() throws {
+        let scan = try save("a.com")
+        viewModel.load()
+
+        viewModel.delete(id: scan.id)
+        #expect(viewModel.undoMessage == "Scan deleted")
+    }
+
+    @Test func undoPutsTheScanBackInTheListAndTheStore() throws {
+        let kept = try save("a.com", hoursAgo: 1)
+        let doomed = try save("b.com", hoursAgo: 2)
+        viewModel.load()
+        viewModel.delete(id: doomed.id)
+
+        viewModel.undoDelete()
+        #expect(viewModel.scans.map(\.id) == [kept.id, doomed.id])
+        #expect(try history.fetchAll().map(\.id) == [kept.id, doomed.id])
+        #expect(viewModel.undoMessage == nil)
+    }
+
+    @Test func clearingEverythingCanBeUndoneInOneGo() throws {
+        try save("a.com", hoursAgo: 1)
+        try save("b.com", hoursAgo: 2)
+        try save("c.com", hoursAgo: 3)
+        viewModel.load()
+
+        viewModel.deleteAll()
+        #expect(viewModel.undoMessage == "3 scans deleted")
+
+        viewModel.undoDelete()
+        #expect(viewModel.scans.count == 3)
+        #expect(try history.fetchAll().count == 3)
+    }
+
+    @Test func theOfferGoesAwayWhenItsTimeIsUp() throws {
+        let scan = try save("a.com")
+        viewModel.load()
+        viewModel.delete(id: scan.id)
+
+        viewModel.expireUndo(generation: viewModel.undoGeneration)
+        #expect(viewModel.undoMessage == nil)
+    }
+
+    @Test func anOldTimerCannotHideANewerOffer() throws {
+        let first = try save("a.com", hoursAgo: 1)
+        let second = try save("b.com", hoursAgo: 2)
+        viewModel.load()
+
+        viewModel.delete(id: first.id)
+        let oldGeneration = viewModel.undoGeneration
+        viewModel.delete(id: second.id)
+
+        viewModel.expireUndo(generation: oldGeneration)
+        #expect(viewModel.undoableScans.map(\.id) == [second.id])
+    }
+
+    @Test func onlyTheLatestDeletionIsUndone() throws {
+        let first = try save("a.com", hoursAgo: 1)
+        let second = try save("b.com", hoursAgo: 2)
+        viewModel.load()
+        viewModel.delete(id: first.id)
+        viewModel.delete(id: second.id)
+
+        viewModel.undoDelete()
+        #expect(viewModel.scans.map(\.id) == [second.id])
+    }
+
+    @Test func undoWithNothingDeletedChangesNothing() throws {
+        try save("a.com")
+        viewModel.load()
+
+        viewModel.undoDelete()
+        #expect(viewModel.scans.count == 1)
+        #expect(viewModel.errorMessage == nil)
+    }
+
+    @Test func scanThatCameBackAnotherWayIsNotDoubled() throws {
+        let scan = try save("a.com")
+        viewModel.load()
+        viewModel.delete(id: scan.id)
+
+        try history.save(scan)
+        viewModel.load()
+        viewModel.undoDelete()
+
+        #expect(viewModel.scans.count == 1)
+        #expect(try history.fetchAll().count == 1)
+    }
+
+    @Test func failedUndoSaysSoAndKeepsTheOffer() throws {
+        let scan = try save("a.com")
+        let failing = HistoryViewModel(history: SaveFailingStore(base: history), calendar: calendar)
+        failing.load()
+        failing.delete(id: scan.id)
+
+        failing.undoDelete()
+        #expect(failing.errorMessage != nil)
+        #expect(failing.undoMessage == "Scan deleted")
+    }
+
+    @Test func failedDeleteOffersNoUndo() {
+        let failing = HistoryViewModel(history: FailingHistoryStore(), calendar: calendar)
+        failing.delete(id: UUID())
+        #expect(failing.undoMessage == nil)
     }
 
     @Test func failedLoadShowsError() {

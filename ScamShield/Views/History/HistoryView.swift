@@ -10,6 +10,7 @@ import SwiftUI
 struct HistoryView: View {
 
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var viewModel = HistoryViewModel()
     @State private var isConfirmingClear = false
 
@@ -36,6 +37,26 @@ struct HistoryView: View {
                 Text("This cannot be undone.")
             }
             .onAppear { viewModel.load() }
+            .overlay(alignment: .bottom) {
+                if let message = viewModel.undoMessage {
+                    UndoBanner(message: message) { viewModel.undoDelete() }
+                        .padding()
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .animation(reduceMotion ? nil : .default, value: viewModel.undoMessage)
+            //the offer disappears on its own, people using VoiceOver get longer to reach it
+            .task(id: viewModel.undoGeneration) {
+                guard viewModel.undoMessage != nil else { return }
+                let generation = viewModel.undoGeneration
+                try? await Task.sleep(for: .seconds(UIAccessibility.isVoiceOverRunning ? 10 : 5))
+                viewModel.expireUndo(generation: generation)
+            }
+            .onChange(of: viewModel.undoGeneration) { _, _ in
+                if let message = viewModel.undoMessage {
+                    AccessibilityNotification.Announcement("\(message). Undo is available.").post()
+                }
+            }
     }
 
     @ViewBuilder
@@ -158,6 +179,28 @@ struct HistoryView: View {
                 Button("Clear Filters") { viewModel.clearFilters() }
             }
         }
+    }
+}
+
+struct UndoBanner: View {
+
+    let message: String
+    let onUndo: () -> Void
+
+    var body: some View {
+        HStack(spacing: 16) {
+            Label(message, systemImage: "trash")
+                .font(.subheadline.weight(.medium))
+            Spacer(minLength: 8)
+            Button("Undo", action: onUndo)
+                .font(.subheadline.bold())
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 12)
+        .background(.regularMaterial, in: Capsule())
+        .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
+        .frame(maxWidth: 420)
+        .accessibilityElement(children: .contain)
     }
 }
 

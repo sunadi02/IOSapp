@@ -62,6 +62,20 @@ final class HistoryViewModel {
         return scans.first { $0.id == selectedScanID }
     }
 
+    //the last deletion, kept for a few seconds so it can be undone
+    private(set) var undoableScans: [ScanResult] = []
+
+    //changes with every deletion so an old timer cannot hide a newer undo offer
+    private(set) var undoGeneration = 0
+
+    var undoMessage: String? {
+        switch undoableScans.count {
+        case 0: nil
+        case 1: "Scan deleted"
+        default: "\(undoableScans.count) scans deleted"
+        }
+    }
+
     func load() {
         do {
             scans = try history.fetchAll()
@@ -73,25 +87,59 @@ final class HistoryViewModel {
     }
 
     func delete(id: UUID) {
+        let removed = scans.filter { $0.id == id }
+
         do {
             try history.delete(id: id)
             scans.removeAll { $0.id == id }
             dropMissingSelection()
             errorMessage = nil
+            offerUndo(for: removed)
         } catch {
             errorMessage = "Could not delete that scan."
         }
     }
 
     func deleteAll() {
+        let removed = scans
+
         do {
             try history.deleteAll()
             scans = []
             dropMissingSelection()
             errorMessage = nil
+            offerUndo(for: removed)
         } catch {
             errorMessage = "Could not clear your scan history."
         }
+    }
+
+    //saving again also puts the scans back in the cloud and in search
+    func undoDelete() {
+        guard !undoableScans.isEmpty else { return }
+
+        do {
+            for scan in undoableScans {
+                try history.save(scan)
+            }
+            let restoredIDs = Set(undoableScans.map(\.id))
+            scans = (scans.filter { !restoredIDs.contains($0.id) } + undoableScans).sorted { $0.date > $1.date }
+            undoableScans = []
+            errorMessage = nil
+        } catch {
+            errorMessage = "Could not bring back the deleted scan."
+        }
+    }
+
+    func expireUndo(generation: Int) {
+        guard generation == undoGeneration else { return }
+        undoableScans = []
+    }
+
+    private func offerUndo(for removed: [ScanResult]) {
+        guard !removed.isEmpty else { return }
+        undoableScans = removed
+        undoGeneration += 1
     }
 
     private func dropMissingSelection() {
