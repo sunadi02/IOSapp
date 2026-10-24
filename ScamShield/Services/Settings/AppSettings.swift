@@ -13,4 +13,5 @@ enum AppSettings {
     static let appLockEnabled = "appLockEnabled"
     static let alertsEnabled = "alertsEnabled"
     static let hapticsEnabled = "hapticsEnabled"
+    static let handledClipboardChange = "handledClipboardChange"
 }

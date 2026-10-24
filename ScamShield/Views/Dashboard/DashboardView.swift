@@ -10,7 +10,11 @@ import SwiftUI
 struct DashboardView: View {
 
     @Environment(AuthViewModel.self) private var auth
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var viewModel = DashboardViewModel()
+    @State private var clipboard = ClipboardLinkViewModel()
+    @State private var copiedLink: String?
 
     //cards wrap onto more rows when text is large or the screen is narrow
     private let statColumns = [GridItem(.adaptive(minimum: 150), spacing: 12)]
@@ -21,6 +25,16 @@ struct DashboardView: View {
                 Text(viewModel.greeting(name: auth.user?.displayName))
                     .font(.title2.bold())
                     .accessibilityAddTraits(.isHeader)
+
+                if clipboard.showsCard {
+                    CopiedLinkCard { link in
+                        clipboard.markHandled()
+                        copiedLink = link
+                    } onDismiss: {
+                        clipboard.markHandled()
+                    }
+                    .transition(.opacity)
+                }
 
                 LazyVGrid(columns: statColumns, spacing: 12) {
                     StatCard(title: "Scans today", value: viewModel.scansToday, systemImage: "magnifyingglass", color: .blue)
@@ -40,14 +54,25 @@ struct DashboardView: View {
             .padding()
             .frame(maxWidth: 800)
             .frame(maxWidth: .infinity)
+            .animation(reduceMotion ? nil : .default, value: clipboard.showsCard)
         }
         .background(Color(.systemGroupedBackground))
         .navigationTitle("ScamShield")
         .navigationDestination(for: ScanResult.self) { scan in
             ResultView(result: scan)
         }
+        .navigationDestination(item: $copiedLink) { link in
+            CheckLinkView(startingLink: link)
+        }
         .onAppear { viewModel.load() }
         .refreshable { viewModel.load() }
+        .task { await clipboard.refresh() }
+        //a link copied in another app is only visible once ScamShield is active again
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                Task { await clipboard.refresh() }
+            }
+        }
     }
 
     private var quickActions: some View {

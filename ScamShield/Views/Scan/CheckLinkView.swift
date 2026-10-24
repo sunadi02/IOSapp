@@ -9,8 +9,15 @@ import SwiftUI
 
 struct CheckLinkView: View {
 
+    //a link handed over from elsewhere, such as the copied link card, is checked straight away
+    private let startingLink: String?
+
     @State private var viewModel = CheckLinkViewModel()
     @FocusState private var isInputFocused: Bool
+
+    init(startingLink: String? = nil) {
+        self.startingLink = startingLink
+    }
 
     var body: some View {
         Form {
@@ -72,6 +79,12 @@ struct CheckLinkView: View {
         .announceWhenSet(viewModel.errorMessage)
         .navigationDestination(item: $viewModel.result) { result in
             ResultView(result: result, isNewScan: true)
+        }
+        .task {
+            //only the first time, so coming back from the result does not check it again
+            guard let startingLink, viewModel.input.isEmpty else { return }
+            viewModel.input = startingLink
+            await viewModel.check()
         }
     }
 
