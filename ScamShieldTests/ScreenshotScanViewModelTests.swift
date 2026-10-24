@@ -16,7 +16,8 @@ struct ScreenshotScanViewModelTests {
 
     private func makeViewModel(recognizer: MockTextRecognizer = MockTextRecognizer(), threats: [String] = []) -> ScreenshotScanViewModel {
         let linkScanner = LinkScanner(reputation: MockReputationChecker(foundThreats: threats))
-        return ScreenshotScanViewModel(recognizer: recognizer, scanner: MessageScanner(linkScanner: linkScanner), history: history)
+        let scanner = MessageScanner(classifier: MockScamClassifier(), linkScanner: linkScanner)
+        return ScreenshotScanViewModel(recognizer: recognizer, scanner: scanner, history: history)
     }
 
     @Test func recognisedTextFillsTheEditor() async {

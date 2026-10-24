@@ -82,6 +82,7 @@ struct SettingsView: View {
 
             #if DEBUG
             Section {
+                LabeledContent("Scam model", value: ScamClassifier.shared.isAvailable ? "Ready" : "Not installed")
                 Button("Run re-check now") {
                     Task {
                         let flagged = await services.recheck.run(force: true)

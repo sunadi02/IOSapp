@@ -12,9 +12,13 @@ import Foundation
 @MainActor
 struct MessageScannerTests {
 
-    private func makeScanner(threats: [String] = [], error: Error? = nil) -> MessageScanner {
+    private func makeScanner(
+        threats: [String] = [],
+        error: Error? = nil,
+        classifier: MockScamClassifier = MockScamClassifier()
+    ) -> MessageScanner {
         let reputation = MockReputationChecker(foundThreats: threats, error: error)
-        return MessageScanner(linkScanner: LinkScanner(reputation: reputation))
+        return MessageScanner(classifier: classifier, linkScanner: LinkScanner(reputation: reputation))
     }
 
     @Test(arguments: ["", "   \n  "])
@@ -80,6 +84,55 @@ struct MessageScannerTests {
         let result = try await makeScanner().scan("My secret message about my account")
         #expect(!result.shareText.contains("secret"))
         #expect(result.shareText.contains("a message"))
+    }
+
+    @Test func strongModelScoreAddsASignalAndLowersTrust() async throws {
+        let result = try await makeScanner(classifier: MockScamClassifier(probability: 0.95)).scan("See you at lunch")
+
+        let signal = try #require(result.signals.first { $0.title == "Matches known scam messages" })
+        #expect(signal.detail.contains("95%"))
+        #expect(result.trustScore == 70)
+    }
+
+    @Test func middlingModelScoreAddsAMilderSignal() async throws {
+        let result = try await makeScanner(classifier: MockScamClassifier(probability: 0.8)).scan("See you at lunch")
+        #expect(result.signals.map(\.title) == ["Similar to scam messages"])
+        #expect(result.trustScore == 85)
+    }
+
+    @Test func lowModelScoreSaysNothing() async throws {
+        let result = try await makeScanner(classifier: MockScamClassifier(probability: 0.2)).scan("See you at lunch")
+        #expect(result.signals.isEmpty)
+    }
+
+    @Test func missingModelIsSilent() async throws {
+        let result = try await makeScanner(classifier: MockScamClassifier(probability: nil)).scan("See you at lunch")
+        #expect(result.signals.isEmpty)
+        #expect(result.trustScore == 100)
+    }
+
+    @Test func modelScoreAddsToWordingSignals() async throws {
+        let text = "URGENT: your account will be suspended. Share your OTP now"
+        let without = try await makeScanner().scan(text)
+        let with = try await makeScanner(classifier: MockScamClassifier(probability: 0.97)).scan(text)
+
+        #expect(with.trustScore == max(without.trustScore - 30, 0))
+        #expect(with.riskLevel == .risky)
+    }
+
+    @Test func modelReadsTheStoredTextOnly() async throws {
+        let classifier = MockScamClassifier(probability: 0.1)
+        _ = try await makeScanner(classifier: classifier).scan("  Hello there  ")
+        #expect(classifier.checkedTexts == ["Hello there"])
+    }
+
+    @Test func nonEnglishMessagesSkipTheModel() async throws {
+        let classifier = MockScamClassifier(probability: 0.99)
+        let sinhala = String(repeating: "ඔබගේ ගිණුම අත්හිටුවා ඇත. කරුණාකර ඔබගේ විස්තර තහවුරු කරන්න. ", count: 3)
+        let result = try await makeScanner(classifier: classifier).scan(sinhala)
+
+        #expect(classifier.checkedTexts.isEmpty)
+        #expect(!result.signals.map(\.title).contains("Matches known scam messages"))
     }
 
     @Test func englishLimitationIsExplainedInTheResult() async throws {

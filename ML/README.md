@@ -26,6 +26,10 @@ It prints the accuracy on messages held back from training, a few sample predict
 
 If the script cannot import Create ML, the same result is possible with the Create ML app (Xcode, Open Developer Tool, Create ML): choose Text Classifier, use `Data/sms_spam_collection.csv` as training data with `text` and `label` as the columns, and export the model as `ScamTextClassifier.mlmodel`.
 
+## How the app uses it
+
+`ScamClassifier` (in `ScamShield/Services/Analysis`) loads `ScamTextClassifier` from the app bundle when the app starts and asks it how likely a scanned message is a scam. The answer becomes one more reason on the result screen: a score of 90% or more adds a strong warning, 75% to 90% a mild one, and anything lower says nothing. If the model file is missing the app still works and simply skips this step. Settings, in debug builds, shows whether the model is loaded.
+
 ## Data sources and credit
 
 **Public data.** `Data/sms_spam_collection.csv` comes from the SMS Spam Collection v.1 on the UCI Machine Learning Repository, licensed under Creative Commons Attribution 4.0 (CC BY 4.0).

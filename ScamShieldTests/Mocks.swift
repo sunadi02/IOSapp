@@ -133,6 +133,22 @@ struct MockBarcodeDetector: BarcodeDetecting {
     func payloads(in pixelBuffer: CVPixelBuffer) throws -> [String] { found }
 }
 
+//gives a fixed answer and remembers what it was asked, nil means the model is not installed
+@MainActor
+final class MockScamClassifier: ScamClassifying {
+    var probability: Double?
+    private(set) var checkedTexts: [String] = []
+
+    init(probability: Double? = nil) {
+        self.probability = probability
+    }
+
+    func scamProbability(for text: String) -> Double? {
+        checkedTexts.append(text)
+        return probability
+    }
+}
+
 //hands back fixed text so no real screenshot is needed
 struct MockTextRecognizer: TextRecognizing {
     var text = ""

@@ -21,10 +21,16 @@ struct MessageScanner {
     static let maxStoredLength = 2000
 
     let analyzer: MessageAnalyzer
+    let classifier: ScamClassifying
     let linkScanner: LinkScanner
 
-    init(analyzer: MessageAnalyzer = MessageAnalyzer(), linkScanner: LinkScanner = .live) {
+    init(
+        analyzer: MessageAnalyzer = MessageAnalyzer(),
+        classifier: ScamClassifying = ScamClassifier.shared,
+        linkScanner: LinkScanner = .live
+    ) {
         self.analyzer = analyzer
+        self.classifier = classifier
         self.linkScanner = linkScanner
     }
 
@@ -43,8 +49,16 @@ struct MessageScanner {
             }
         }
 
-        //only the riskiest link counts so a message with several links is not punished several times
         var signals = analysis.signals
+
+        //the model only learned English, so other languages are left to the link checks
+        if analysis.isSupportedLanguage,
+           let probability = classifier.scamProbability(for: text),
+           let signal = ScamClassifier.signal(for: probability) {
+            signals.append(signal)
+        }
+
+        //only the riskiest link counts so a message with several links is not punished several times
         if let worst = linkResults.min(by: { $0.trustScore < $1.trustScore }) {
             let host = URL(string: worst.input)?.host() ?? worst.input
             signals += worst.signals.map {
