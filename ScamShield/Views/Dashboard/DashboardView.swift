@@ -20,12 +20,19 @@ struct DashboardView: View {
             VStack(alignment: .leading, spacing: 24) {
                 Text(viewModel.greeting(name: auth.user?.displayName))
                     .font(.title2.bold())
+                    .accessibilityAddTraits(.isHeader)
 
                 LazyVGrid(columns: statColumns, spacing: 12) {
                     StatCard(title: "Scans today", value: viewModel.scansToday, systemImage: "magnifyingglass", color: .blue)
                     StatCard(title: "Risky today", value: viewModel.riskyToday, systemImage: "xmark.shield.fill", color: .red)
                     StatCard(title: "Total scans", value: viewModel.totalScans, systemImage: "clock.fill", color: .purple)
                 }
+
+                WeeklyChartCard(
+                    breakdown: viewModel.weeklyBreakdown,
+                    total: viewModel.weeklyTotal,
+                    summary: viewModel.weeklySummary
+                )
 
                 quickActions
                 recentScans
@@ -47,6 +54,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Quick actions")
                 .font(.title3.bold())
+                .accessibilityAddTraits(.isHeader)
 
             NavigationLink {
                 CheckLinkView()
@@ -74,6 +82,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Recent scans")
                 .font(.title3.bold())
+                .accessibilityAddTraits(.isHeader)
 
             if let error = viewModel.loadError {
                 Label(error, systemImage: "exclamationmark.triangle.fill")
@@ -141,12 +150,15 @@ struct QuickActionRow: View {
     let subtitle: String
     let systemImage: String
 
+    //the coloured square grows with the text size so large text does not squash the icon
+    @ScaledMetric(relativeTo: .title2) private var iconSize = 48
+
     var body: some View {
         HStack(spacing: 16) {
             Image(systemName: systemImage)
                 .font(.title2)
                 .foregroundStyle(.white)
-                .frame(width: 48, height: 48)
+                .frame(width: iconSize, height: iconSize)
                 .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 12))
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
