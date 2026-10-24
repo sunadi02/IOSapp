@@ -11,6 +11,7 @@ import SwiftUI
 struct AdaptiveMainView: View {
 
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(AppServices.self) private var services
     @AppStorage(AppSettings.alertsEnabled) private var alertsEnabled = true
     @State private var selection: AppSection = .home
@@ -28,6 +29,16 @@ struct AdaptiveMainView: View {
             } else {
                 MainTabView(selection: $selection)
             }
+        }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if !services.network.isOnline {
+                OfflineBanner()
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .animation(reduceMotion ? nil : .default, value: services.network.isOnline)
+        .onChange(of: services.network.isOnline) { _, isOnline in
+            AccessibilityNotification.Announcement(isOnline ? "Back online" : "You are offline").post()
         }
         .focusedSceneValue(\.appSection, usesSidebar ? $selection : nil)
         .task {

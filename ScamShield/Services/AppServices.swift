@@ -18,6 +18,7 @@ final class AppServices {
     let recheck: RecheckService
     let sync: HistorySyncService
     let router: NotificationRouter
+    let network: NetworkMonitor
 
     @ObservationIgnored private let notificationDelegate = NotificationDelegate()
     @ObservationIgnored private var authListener: NSObjectProtocol?
@@ -25,19 +26,30 @@ final class AppServices {
     init(
         notifications: NotificationScheduling = NotificationService(),
         history: HistoryStoring = AppHistory.store,
-        sync: HistorySyncService = AppHistory.sync
+        sync: HistorySyncService = AppHistory.sync,
+        network: NetworkMonitor = NetworkMonitor()
     ) {
         self.notifications = notifications
         self.sync = sync
+        self.network = network
         recheck = RecheckService(history: history, notifications: notifications)
         router = NotificationRouter(history: history)
 
         notificationDelegate.onOpenScan = { [router] id in router.open(id: id) }
         UNUserNotificationCenter.current().delegate = notificationDelegate
+
+        //anything saved or deleted while offline is caught up as soon as the connection returns
+        network.onReconnect = { [sync, recheck] in
+            Task {
+                await sync.sync()
+                await recheck.run()
+            }
+        }
     }
 
     //starts after firebase is configured, signing in pulls the cloud history and signing out clears this device
     func start() {
+        network.start()
         guard authListener == nil else { return }
 
         authListener = Auth.auth().addStateDidChangeListener { [sync] _, user in
