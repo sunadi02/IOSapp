@@ -38,6 +38,32 @@ struct SettingsViewModelTests {
         #expect(viewModel.statusMessage == nil)
     }
 
+    @Test func alertsStayOnWhenPermissionIsGranted() async {
+        let notifier = MockNotifier()
+        let viewModel = SettingsViewModel(history: history, notifications: notifier)
+
+        #expect(await viewModel.setAlerts(true))
+        #expect(viewModel.alertsMessage == nil)
+        #expect(notifier.permissionRequests == 1)
+    }
+
+    @Test func alertsTurnBackOffWhenPermissionIsDenied() async {
+        let notifier = MockNotifier()
+        notifier.permissionGranted = false
+        let viewModel = SettingsViewModel(history: history, notifications: notifier)
+
+        #expect(await viewModel.setAlerts(true) == false)
+        #expect(viewModel.alertsMessage != nil)
+    }
+
+    @Test func turningAlertsOffNeverAsksForPermission() async {
+        let notifier = MockNotifier()
+        let viewModel = SettingsViewModel(history: history, notifications: notifier)
+
+        #expect(await viewModel.setAlerts(false) == false)
+        #expect(notifier.permissionRequests == 0)
+    }
+
     @Test func versionShowsVersionAndBuild() {
         let info: [String: Any] = ["CFBundleShortVersionString": "2.1", "CFBundleVersion": "7"]
         let viewModel = SettingsViewModel(history: history, appInfo: info)

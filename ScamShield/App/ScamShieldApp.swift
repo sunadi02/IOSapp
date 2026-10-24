@@ -11,6 +11,9 @@ import FirebaseCore
 @main
 struct ScamShieldApp: App {
 
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var services = AppServices()
+
     //firebase must be configured once before any auth or firestore call
     init() {
         FirebaseApp.configure()
@@ -19,6 +22,16 @@ struct ScamShieldApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(services)
+                .task {
+                    services.start()
+                    await services.appBecameActive()
+                }
+                .onChange(of: scenePhase) { _, phase in
+                    if phase == .active {
+                        Task { await services.appBecameActive() }
+                    }
+                }
         }
     }
 }

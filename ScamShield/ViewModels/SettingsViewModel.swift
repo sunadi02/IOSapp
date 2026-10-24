@@ -13,12 +13,19 @@ final class SettingsViewModel {
 
     private(set) var statusMessage: String?
     private(set) var errorMessage: String?
+    private(set) var alertsMessage: String?
 
     private let history: HistoryStoring
+    private let notifications: NotificationScheduling
     private let appInfo: [String: Any]
 
-    init(history: HistoryStoring = CoreDataHistoryRepository(), appInfo: [String: Any]? = Bundle.main.infoDictionary) {
+    init(
+        history: HistoryStoring = AppHistory.store,
+        notifications: NotificationScheduling = NotificationService(),
+        appInfo: [String: Any]? = Bundle.main.infoDictionary
+    ) {
         self.history = history
+        self.notifications = notifications
         self.appInfo = appInfo ?? [:]
     }
 
@@ -37,5 +44,14 @@ final class SettingsViewModel {
             statusMessage = nil
             errorMessage = "Could not clear your scan history."
         }
+    }
+
+    //returns the value the alerts toggle should show once permission is known
+    func setAlerts(_ enabled: Bool) async -> Bool {
+        guard enabled else { return false }
+
+        let granted = await notifications.requestPermission()
+        alertsMessage = granted ? nil : "Notifications are turned off for ScamShield. Turn them on in iOS Settings to get scam alerts."
+        return granted
     }
 }

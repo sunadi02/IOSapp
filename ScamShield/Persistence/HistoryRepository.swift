@@ -11,6 +11,8 @@ import CoreData
 protocol HistoryStoring {
     func save(_ result: ScanResult) throws
     func fetchAll() throws -> [ScanResult]
+    func fetchUnsynced() throws -> [ScanResult]
+    func markSynced(ids: [UUID]) throws
     func delete(id: UUID) throws
     func deleteAll() throws
 }
@@ -41,6 +43,21 @@ struct CoreDataHistoryRepository: HistoryStoring {
         let request = ScanRecord.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(keyPath: \ScanRecord.date, ascending: false)]
         return try context.fetch(request).compactMap(\.scanResult)
+    }
+
+    func fetchUnsynced() throws -> [ScanResult] {
+        let request = ScanRecord.fetchRequest()
+        request.predicate = NSPredicate(format: "isSynced == NO")
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \ScanRecord.date, ascending: true)]
+        return try context.fetch(request).compactMap(\.scanResult)
+    }
+
+    func markSynced(ids: [UUID]) throws {
+        guard !ids.isEmpty else { return }
+        let request = ScanRecord.fetchRequest()
+        request.predicate = NSPredicate(format: "id IN %@", NSArray(array: ids.map { $0 as NSUUID }))
+        try context.fetch(request).forEach { $0.isSynced = true }
+        try context.save()
     }
 
     func delete(id: UUID) throws {

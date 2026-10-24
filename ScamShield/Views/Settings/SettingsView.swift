@@ -11,12 +11,14 @@ struct SettingsView: View {
 
     @Environment(AuthViewModel.self) private var auth
     @Environment(AppLockViewModel.self) private var lock
+    @Environment(AppServices.self) private var services
     @AppStorage(AppSettings.alertsEnabled) private var alertsEnabled = true
     @State private var viewModel = SettingsViewModel()
     @State private var isEditingName = false
     @State private var isConfirmingClear = false
     @State private var isConfirmingSignOut = false
     @State private var isLockOn = false
+    @State private var recheckMessage: String?
 
     private var lockFooter: String {
         if let error = lock.errorMessage { return error }
@@ -25,7 +27,7 @@ struct SettingsView: View {
     }
 
     private var dataFooter: String {
-        viewModel.errorMessage ?? viewModel.statusMessage ?? "Removes every saved scan from this device."
+        viewModel.errorMessage ?? viewModel.statusMessage ?? "Removes every saved scan from this device and your account."
     }
 
     var body: some View {
@@ -40,10 +42,13 @@ struct SettingsView: View {
 
             Section {
                 Toggle("Scam alerts", isOn: $alertsEnabled)
+                if viewModel.alertsMessage != nil, let url = URL(string: UIApplication.openSettingsURLString) {
+                    Link("Open iOS Settings", destination: url)
+                }
             } header: {
                 Text("Notifications")
             } footer: {
-                Text("Get notified if a link you checked earlier is later reported as a scam.")
+                Text(viewModel.alertsMessage ?? "Get notified if a link you checked earlier is later reported as a scam.")
             }
 
             Section {
@@ -72,8 +77,23 @@ struct SettingsView: View {
             } header: {
                 Text("About")
             } footer: {
-                Text("Links are checked on your device first. Only the link address is sent to Google Safe Browsing to look for known threats.")
+                Text("Links are checked on your device first. Only the link address is sent to Google Safe Browsing. Your scan history is stored in your private ScamShield account so it syncs across your devices.")
             }
+
+            #if DEBUG
+            Section {
+                Button("Run re-check now") {
+                    Task {
+                        let flagged = await services.recheck.run(force: true)
+                        recheckMessage = "Re-check finished, \(flagged) link(s) newly flagged."
+                    }
+                }
+            } header: {
+                Text("Developer")
+            } footer: {
+                if let recheckMessage { Text(recheckMessage) }
+            }
+            #endif
 
             Section {
                 Button("Sign Out", role: .destructive) {
@@ -88,6 +108,10 @@ struct SettingsView: View {
                 await lock.setEnabled(newValue)
                 isLockOn = lock.isEnabled
             }
+        }
+        .onChange(of: alertsEnabled) { _, isOn in
+            guard isOn else { return }
+            Task { alertsEnabled = await viewModel.setAlerts(true) }
         }
         .sheet(isPresented: $isEditingName) {
             EditNameView(currentName: auth.user?.displayName ?? "")
@@ -114,4 +138,5 @@ struct SettingsView: View {
     }
     .environment(AuthViewModel(service: PreviewAuthService()))
     .environment(AppLockViewModel())
+    .environment(AppServices())
 }

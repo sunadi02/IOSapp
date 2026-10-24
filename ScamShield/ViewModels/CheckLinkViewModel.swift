@@ -19,7 +19,7 @@ final class CheckLinkViewModel {
     private let scanner: LinkScanner
     private let history: HistoryStoring
 
-    init(scanner: LinkScanner = LinkScanner(), history: HistoryStoring = CoreDataHistoryRepository()) {
+    init(scanner: LinkScanner = LinkScanner(), history: HistoryStoring = AppHistory.store) {
         self.scanner = scanner
         self.history = history
     }

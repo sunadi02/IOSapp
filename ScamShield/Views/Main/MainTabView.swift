@@ -13,9 +13,13 @@ struct MainTabView: View {
         case home, history, community, settings
     }
 
+    @Environment(AppServices.self) private var services
+    @AppStorage(AppSettings.alertsEnabled) private var alertsEnabled = true
     @State private var selection: Tab = .home
 
     var body: some View {
+        @Bindable var router = services.router
+
         //each tab has its own navigation stack so going back stays inside that tab
         TabView(selection: $selection) {
             NavigationStack {
@@ -25,8 +29,7 @@ struct MainTabView: View {
             .tag(Tab.home)
 
             NavigationStack {
-                ContentUnavailableView("History", systemImage: "clock", description: Text("Your full scan history will appear here."))
-                    .navigationTitle("History")
+                HistoryView()
             }
             .tabItem { Label("History", systemImage: "clock.fill") }
             .tag(Tab.history)
@@ -44,6 +47,19 @@ struct MainTabView: View {
             .tabItem { Label("Settings", systemImage: "gearshape.fill") }
             .tag(Tab.settings)
         }
+        .task {
+            if alertsEnabled { _ = await services.notifications.requestPermission() }
+        }
+        .sheet(item: $router.openedScan) { scan in
+            NavigationStack {
+                ResultView(result: scan)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { router.openedScan = nil }
+                        }
+                    }
+            }
+        }
     }
 }
 
@@ -51,4 +67,5 @@ struct MainTabView: View {
     MainTabView()
         .environment(AuthViewModel(service: PreviewAuthService()))
         .environment(AppLockViewModel())
+        .environment(AppServices())
 }

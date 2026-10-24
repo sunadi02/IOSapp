@@ -27,7 +27,7 @@ final class HistoryViewModel {
     private let history: HistoryStoring
     private let calendar: Calendar
 
-    init(history: HistoryStoring = CoreDataHistoryRepository(), calendar: Calendar = .current) {
+    init(history: HistoryStoring = AppHistory.store, calendar: Calendar = .current) {
         self.history = history
         self.calendar = calendar
     }

@@ -15,6 +15,8 @@ struct FailingHistoryStore: HistoryStoring {
 
     func save(_ result: ScanResult) throws { throw StoreError() }
     func fetchAll() throws -> [ScanResult] { throw StoreError() }
+    func fetchUnsynced() throws -> [ScanResult] { throw StoreError() }
+    func markSynced(ids: [UUID]) throws { throw StoreError() }
     func delete(id: UUID) throws { throw StoreError() }
     func deleteAll() throws { throw StoreError() }
 }
