@@ -64,6 +64,30 @@ struct SettingsViewModelTests {
         #expect(notifier.permissionRequests == 0)
     }
 
+    @Test func nothingToExportMeansNoFile() {
+        let viewModel = SettingsViewModel(history: history)
+        viewModel.prepareExport()
+        #expect(viewModel.exportFile == nil)
+    }
+
+    @Test func savedScansAreReadyToExport() throws {
+        try history.save(ScanResult(type: .link, input: "https://a.com", riskLevel: .safe, trustScore: 95))
+        let viewModel = SettingsViewModel(history: history)
+
+        viewModel.prepareExport()
+        let file = try #require(viewModel.exportFile)
+        #expect(file.text.contains("https://a.com"))
+    }
+
+    @Test func clearingHistoryAlsoClearsTheExport() throws {
+        try history.save(ScanResult(type: .link, input: "https://a.com", riskLevel: .safe, trustScore: 95))
+        let viewModel = SettingsViewModel(history: history)
+        viewModel.prepareExport()
+
+        viewModel.clearHistory()
+        #expect(viewModel.exportFile == nil)
+    }
+
     @Test func versionShowsVersionAndBuild() {
         let info: [String: Any] = ["CFBundleShortVersionString": "2.1", "CFBundleVersion": "7"]
         let viewModel = SettingsViewModel(history: history, appInfo: info)

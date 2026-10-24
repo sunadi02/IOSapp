@@ -14,6 +14,7 @@ final class SettingsViewModel {
     private(set) var statusMessage: String?
     private(set) var errorMessage: String?
     private(set) var alertsMessage: String?
+    private(set) var exportFile: HistoryExportFile?
 
     private let history: HistoryStoring
     private let notifications: NotificationScheduling
@@ -44,6 +45,13 @@ final class SettingsViewModel {
             statusMessage = nil
             errorMessage = "Could not clear your scan history."
         }
+        prepareExport()
+    }
+
+    //made when Settings opens so the share button already has a file, nothing to export means no button
+    func prepareExport() {
+        let scans = (try? history.fetchAll()) ?? []
+        exportFile = scans.isEmpty ? nil : HistoryExportFile(text: HistoryExporter.csv(for: scans))
     }
 
     //returns the value the alerts toggle should show once permission is known

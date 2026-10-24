@@ -28,7 +28,8 @@ struct SettingsView: View {
     }
 
     private var dataFooter: String {
-        viewModel.errorMessage ?? viewModel.statusMessage ?? "Removes every saved scan from this device and your account."
+        viewModel.errorMessage ?? viewModel.statusMessage
+            ?? "Export makes a spreadsheet of your link and QR checks, without any message text. Clearing removes every saved scan from this device and your account."
     }
 
     var body: some View {
@@ -82,6 +83,14 @@ struct SettingsView: View {
             }
 
             Section {
+                if let exportFile = viewModel.exportFile {
+                    ShareLink(
+                        item: exportFile,
+                        preview: SharePreview(HistoryExporter.fileName, image: Image(systemName: "tablecells"))
+                    ) {
+                        Label("Export Scan History", systemImage: "square.and.arrow.up")
+                    }
+                }
                 Button("Clear Scan History", systemImage: "trash", role: .destructive) {
                     isConfirmingClear = true
                 }
@@ -123,7 +132,10 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Settings")
-        .onAppear { isLockOn = lock.isEnabled }
+        .onAppear {
+            isLockOn = lock.isEnabled
+            viewModel.prepareExport()
+        }
         .onChange(of: isLockOn) { _, newValue in
             Task {
                 await lock.setEnabled(newValue)
