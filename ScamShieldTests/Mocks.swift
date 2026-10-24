@@ -5,6 +5,7 @@
 //  Created by student2 on 2026-10-24.
 //
 
+import AVFoundation
 import Foundation
 @testable import ScamShield
 
@@ -66,6 +67,70 @@ final class MockRemoteHistory: RemoteHistoryStoring {
         deletedIDs.append(contentsOf: ids)
         stored.removeAll { ids.contains($0.id) }
     }
+}
+
+//stands in for the community collection and remembers what the app asked it
+@MainActor
+final class MockCommunityService: CommunityReporting {
+    var counts: [String: Int] = [:]
+    var countError: Error?
+    var submitError: Error?
+    var feed: [ScamReport] = []
+    var feedError: Error?
+    private(set) var queriedDomains: [String] = []
+    private(set) var submissions: [(url: String, category: ScamCategory, type: ScanType)] = []
+
+    func submit(url: String, category: ScamCategory, type: ScanType) async throws {
+        if let submitError { throw submitError }
+        submissions.append((url, category, type))
+    }
+
+    func reportCount(forDomain domain: String) async throws -> Int {
+        queriedDomains.append(domain)
+        if let countError { throw countError }
+        return counts[domain] ?? 0
+    }
+
+    func reports(limit: Int) -> AsyncThrowingStream<[ScamReport], Error> {
+        let feed = feed
+        let feedError = feedError
+
+        return AsyncThrowingStream { continuation in
+            if let feedError {
+                continuation.finish(throwing: feedError)
+            } else {
+                continuation.yield(feed)
+                continuation.finish()
+            }
+        }
+    }
+}
+
+//camera that only counts what it was asked to do
+final class MockCamera: CameraControlling {
+    let session = AVCaptureSession()
+    var setupResult: CameraSetupResult = .ready
+    private(set) var startCount = 0
+    private(set) var stopCount = 0
+    private(set) var torchStates: [Bool] = []
+
+    func configure() async -> CameraSetupResult { setupResult }
+    func start(onCode: @escaping @Sendable (String) -> Void) { startCount += 1 }
+    func stop() { stopCount += 1 }
+    func setTorch(_ isOn: Bool) { torchStates.append(isOn) }
+}
+
+//returns the codes it was given so no real image is needed
+struct MockBarcodeDetector: BarcodeDetecting {
+    var found: [String] = []
+    var shouldFail = false
+
+    func payloads(inImageData data: Data) throws -> [String] {
+        if shouldFail { throw URLError(.cannotDecodeContentData) }
+        return found
+    }
+
+    func payloads(in pixelBuffer: CVPixelBuffer) throws -> [String] { found }
 }
 
 //lets a test sign the user in and out after the service was created

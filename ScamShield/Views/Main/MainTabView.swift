@@ -35,8 +35,7 @@ struct MainTabView: View {
             .tag(Tab.history)
 
             NavigationStack {
-                ContentUnavailableView("Community", systemImage: "person.3", description: Text("Scam reports from other users will appear here."))
-                    .navigationTitle("Community")
+                CommunityView()
             }
             .tabItem { Label("Community", systemImage: "person.3.fill") }
             .tag(Tab.community)

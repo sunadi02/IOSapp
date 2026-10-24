@@ -84,7 +84,7 @@ struct FirestoreHistoryRemote: RemoteHistoryStoring {
         return ScanResult(id: uuid, type: type, input: input, riskLevel: riskLevel, trustScore: trustScore, signals: signals, date: date)
     }
 
-    private static func date(from value: Any?) -> Date? {
+    static func date(from value: Any?) -> Date? {
         if let timestamp = value as? Timestamp { return timestamp.dateValue() }
         return value as? Date
     }

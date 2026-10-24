@@ -54,8 +54,12 @@ struct DashboardView: View {
                 QuickActionRow(title: "Check a link", subtitle: "Paste a link from a message", systemImage: "link")
             }
 
-            QuickActionRow(title: "Scan a QR code", subtitle: "Coming soon", systemImage: "qrcode.viewfinder")
-                .opacity(0.5)
+            NavigationLink {
+                QRScannerView()
+            } label: {
+                QuickActionRow(title: "Scan a QR code", subtitle: "Check a code before you open it", systemImage: "qrcode.viewfinder")
+            }
+
             QuickActionRow(title: "Scan a screenshot", subtitle: "Coming soon", systemImage: "text.viewfinder")
                 .opacity(0.5)
         }

@@ -54,6 +54,7 @@ struct RecheckService {
 
         for scan in candidates {
             guard let url = URL(string: scan.input),
+                  url.scheme?.lowercased().hasPrefix("http") == true,
                   let threats = try? await reputation.threats(for: url) else { continue }
 
             checked += 1

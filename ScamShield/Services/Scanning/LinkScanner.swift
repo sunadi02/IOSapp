@@ -20,14 +20,22 @@ struct LinkScanner {
 
     let analyzer = URLAnalyzer()
     let reputation: LinkReputationChecking
+    let community: CommunityReporting?
 
-    init(reputation: LinkReputationChecking = SafeBrowsingService()) {
+    //community lookups are off unless asked for so tests never reach firestore
+    init(reputation: LinkReputationChecking = SafeBrowsingService(), community: CommunityReporting? = nil) {
         self.reputation = reputation
+        self.community = community
+    }
+
+    static var live: LinkScanner {
+        LinkScanner(community: FirestoreCommunityService())
     }
 
     func scan(_ raw: String, as type: ScanType = .link) async throws -> ScanResult {
         guard let url = URLAnalyzer.normalize(raw) else { throw LinkScanError.invalidLink }
 
+        async let communityReport = communityReports(for: url)
         var signals = analyzer.analyze(url)
         var verified = false
 
@@ -43,7 +51,31 @@ struct LinkScanner {
             signals.append(RiskSignal(title: "Online check unavailable", detail: "Could not reach Google Safe Browsing, so this result only uses on-device checks.", weight: 0))
         }
 
+        if let report = await communityReport, report.count > 0 {
+            let users = report.count == 1 ? "1 ScamShield user has" : "\(report.count) ScamShield users have"
+            signals.append(RiskSignal(
+                title: "Reported by the community",
+                detail: "\(users) reported \(report.domain) as a scam.",
+                weight: Self.communityWeight(for: report.count)
+            ))
+        }
+
         return RiskScorer.makeResult(type: type, input: url.absoluteString, signals: signals, verified: verified)
+    }
+
+    //one report is a warning, five from different people is enough to call a link risky
+    static func communityWeight(for count: Int) -> Int {
+        switch count {
+        case ..<2: 25
+        case 2..<5: 40
+        default: 55
+        }
+    }
+
+    private func communityReports(for url: URL) async -> (domain: String, count: Int)? {
+        guard let community, let domain = CommunityDomain.name(for: url) else { return nil }
+        guard let count = try? await community.reportCount(forDomain: domain) else { return nil }
+        return (domain, count)
     }
 
     static func friendlyName(for threat: String) -> String {

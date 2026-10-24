@@ -11,6 +11,12 @@ struct ResultView: View {
 
     let result: ScanResult
 
+    @State private var isReporting = false
+
+    private var canReport: Bool {
+        result.type != .screenshot && URLAnalyzer.normalize(result.input) != nil
+    }
+
     var body: some View {
         List {
             Section {
@@ -45,10 +51,20 @@ struct ResultView: View {
                 } label: {
                     Label("Copy", systemImage: "doc.on.doc")
                 }
+                if canReport {
+                    Button {
+                        isReporting = true
+                    } label: {
+                        Label("Report as Scam", systemImage: "exclamationmark.bubble")
+                    }
+                }
             }
         }
         .navigationTitle("Result")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $isReporting) {
+            ReportSheet(scan: result)
+        }
     }
 
     private var summary: some View {

@@ -165,6 +165,7 @@ struct AppLockViewModelTests {
     }
 }
 
+@MainActor
 struct BiometricErrorTests {
 
     @Test(arguments: [

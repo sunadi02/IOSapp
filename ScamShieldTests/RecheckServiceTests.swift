@@ -99,6 +99,13 @@ struct RecheckServiceTests {
         #expect(reputation.checkedURLs.isEmpty)
     }
 
+    @Test func qrResultsThatAreNotWebLinksAreIgnored() async throws {
+        try save("Table12", type: .qr)
+        try save("Wi-Fi network: Cafe", type: .qr)
+        await service.run(now: now)
+        #expect(reputation.checkedURLs.isEmpty)
+    }
+
     @Test func scansOlderThanThirtyDaysAreIgnored() async throws {
         try save("https://old.example.com", daysAgo: 45)
         await service.run(now: now)
