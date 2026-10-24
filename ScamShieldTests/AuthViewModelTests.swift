@@ -15,6 +15,7 @@ final class MockAuthService: AuthServicing {
     var errorToThrow: Error?
     private(set) var signInCalls = 0
     private(set) var resetEmails: [String] = []
+    private(set) var updatedNames: [String] = []
 
     func signIn(email: String, password: String) async throws -> AppUser {
         signInCalls += 1
@@ -30,6 +31,12 @@ final class MockAuthService: AuthServicing {
     func sendPasswordReset(email: String) async throws {
         if let errorToThrow { throw errorToThrow }
         resetEmails.append(email)
+    }
+
+    func updateDisplayName(_ name: String) async throws -> AppUser {
+        if let errorToThrow { throw errorToThrow }
+        updatedNames.append(name)
+        return AppUser(id: "1", email: "user@example.com", displayName: name)
     }
 
     func signOut() throws {
@@ -111,6 +118,37 @@ struct AuthViewModelTests {
         await viewModel.submit()
         viewModel.signOut()
         #expect(!viewModel.isSignedIn)
+    }
+
+    @Test func updatingNameSavesTrimmedNameAndUpdatesUser() async throws {
+        let viewModel = makeViewModel()
+        await viewModel.submit()
+
+        try await viewModel.updateName("  Sunadi Amarasinghe \n")
+        #expect(service.updatedNames == ["Sunadi Amarasinghe"])
+        #expect(viewModel.user?.displayName == "Sunadi Amarasinghe")
+    }
+
+    @Test(arguments: ["", "   ", "\n"])
+    func blankNameIsRejectedBeforeCallingFirebase(_ name: String) async {
+        let viewModel = makeViewModel()
+        await viewModel.submit()
+
+        await #expect(throws: AuthError.emptyName) {
+            try await viewModel.updateName(name)
+        }
+        #expect(service.updatedNames.isEmpty)
+    }
+
+    @Test func failedNameUpdateKeepsOldNameAndThrows() async {
+        let viewModel = makeViewModel()
+        await viewModel.submit()
+        service.errorToThrow = AuthError.network
+
+        await #expect(throws: AuthError.network) {
+            try await viewModel.updateName("New Name")
+        }
+        #expect(viewModel.user?.displayName == nil)
     }
 
     @Test func nonFirebaseErrorMapsToUnknown() {

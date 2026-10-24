@@ -11,7 +11,7 @@ import Observation
 @Observable
 final class AppLockViewModel {
 
-    static let enabledKey = "appLockEnabled"
+    static let enabledKey = AppSettings.appLockEnabled
 
     private(set) var isEnabled: Bool
     private(set) var isLocked: Bool

@@ -104,6 +104,12 @@ final class AuthViewModel {
         }
     }
 
+    func updateName(_ rawName: String) async throws {
+        let name = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { throw AuthError.emptyName }
+        user = try await service.updateDisplayName(name)
+    }
+
     func signOut() {
         do {
             try service.signOut()

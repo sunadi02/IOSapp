@@ -11,6 +11,10 @@ struct SettingsView: View {
 
     @Environment(AuthViewModel.self) private var auth
     @Environment(AppLockViewModel.self) private var lock
+    @AppStorage(AppSettings.alertsEnabled) private var alertsEnabled = true
+    @State private var viewModel = SettingsViewModel()
+    @State private var isEditingName = false
+    @State private var isConfirmingClear = false
     @State private var isConfirmingSignOut = false
     @State private var isLockOn = false
 
@@ -20,11 +24,26 @@ struct SettingsView: View {
         return "Locks ScamShield when you leave the app so your scan history stays private."
     }
 
+    private var dataFooter: String {
+        viewModel.errorMessage ?? viewModel.statusMessage ?? "Removes every saved scan from this device."
+    }
+
     var body: some View {
         Form {
             Section("Account") {
                 LabeledContent("Name", value: auth.user?.displayName ?? "Not set")
                 LabeledContent("Email", value: auth.user?.email ?? "")
+                Button("Edit Name", systemImage: "pencil") {
+                    isEditingName = true
+                }
+            }
+
+            Section {
+                Toggle("Scam alerts", isOn: $alertsEnabled)
+            } header: {
+                Text("Notifications")
+            } footer: {
+                Text("Get notified if a link you checked earlier is later reported as a scam.")
             }
 
             Section {
@@ -36,6 +55,24 @@ struct SettingsView: View {
                 Text("Security")
             } footer: {
                 Text(lockFooter)
+            }
+
+            Section {
+                Button("Clear Scan History", systemImage: "trash", role: .destructive) {
+                    isConfirmingClear = true
+                }
+            } header: {
+                Text("Data")
+            } footer: {
+                Text(dataFooter)
+            }
+
+            Section {
+                LabeledContent("Version", value: viewModel.versionText)
+            } header: {
+                Text("About")
+            } footer: {
+                Text("Links are checked on your device first. Only the link address is sent to Google Safe Browsing to look for known threats.")
             }
 
             Section {
@@ -51,6 +88,17 @@ struct SettingsView: View {
                 await lock.setEnabled(newValue)
                 isLockOn = lock.isEnabled
             }
+        }
+        .sheet(isPresented: $isEditingName) {
+            EditNameView(currentName: auth.user?.displayName ?? "")
+                .presentationDetents([.medium])
+        }
+        .confirmationDialog("Delete all scan history?", isPresented: $isConfirmingClear, titleVisibility: .visible) {
+            Button("Delete All", role: .destructive) {
+                viewModel.clearHistory()
+            }
+        } message: {
+            Text("This cannot be undone.")
         }
         .confirmationDialog("Sign out of ScamShield?", isPresented: $isConfirmingSignOut, titleVisibility: .visible) {
             Button("Sign Out", role: .destructive) {

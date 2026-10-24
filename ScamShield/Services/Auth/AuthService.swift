@@ -20,6 +20,7 @@ protocol AuthServicing {
     func signIn(email: String, password: String) async throws -> AppUser
     func signUp(name: String, email: String, password: String) async throws -> AppUser
     func sendPasswordReset(email: String) async throws
+    func updateDisplayName(_ name: String) async throws -> AppUser
     func signOut() throws
 }
 
@@ -28,6 +29,7 @@ enum AuthError: LocalizedError, Equatable {
     case emailInUse
     case weakPassword
     case invalidEmail
+    case emptyName
     case network
     case tooManyAttempts
     case unknown
@@ -57,6 +59,7 @@ enum AuthError: LocalizedError, Equatable {
         case .emailInUse: "An account with this email already exists."
         case .weakPassword: "Password must be at least 6 characters."
         case .invalidEmail: "Please enter a valid email address."
+        case .emptyName: "Please enter your name."
         case .network: "No internet connection. Please try again."
         case .tooManyAttempts: "Too many attempts. Please wait a moment and try again."
         case .unknown: "Something went wrong. Please try again."
@@ -105,6 +108,19 @@ struct FirebaseAuthService: AuthServicing {
         }
     }
 
+    func updateDisplayName(_ name: String) async throws -> AppUser {
+        guard let user = auth.currentUser else { throw AuthError.unknown }
+
+        do {
+            let change = user.createProfileChangeRequest()
+            change.displayName = name
+            try await change.commitChanges()
+            return AppUser(id: user.uid, email: user.email ?? "", displayName: name)
+        } catch {
+            throw AuthError(error)
+        }
+    }
+
     func signOut() throws {
         try auth.signOut()
     }
@@ -121,6 +137,7 @@ struct PreviewAuthService: AuthServicing {
     func signIn(email: String, password: String) async throws -> AppUser { currentUser! }
     func signUp(name: String, email: String, password: String) async throws -> AppUser { currentUser! }
     func sendPasswordReset(email: String) async throws {}
+    func updateDisplayName(_ name: String) async throws -> AppUser { currentUser! }
     func signOut() throws {}
 }
 #endif
