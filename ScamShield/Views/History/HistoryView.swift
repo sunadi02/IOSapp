@@ -56,8 +56,12 @@ struct HistoryView: View {
     private var scanList: some View {
         List(selection: $viewModel.selectedScanID) {
             if let error = viewModel.errorMessage {
-                Label(error, systemImage: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.red)
+                VStack(alignment: .leading, spacing: 8) {
+                    Label(error, systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.red)
+                    Button("Try Again") { viewModel.load() }
+                        .buttonStyle(.bordered)
+                }
             }
 
             ForEach(viewModel.groups) { group in

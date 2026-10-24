@@ -85,8 +85,12 @@ struct DashboardView: View {
                 .accessibilityAddTraits(.isHeader)
 
             if let error = viewModel.loadError {
-                Label(error, systemImage: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.red)
+                VStack(alignment: .leading, spacing: 8) {
+                    Label(error, systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.red)
+                    Button("Try Again") { viewModel.load() }
+                        .buttonStyle(.bordered)
+                }
             } else if viewModel.recentScans.isEmpty {
                 ContentUnavailableView(
                     "No scans yet",
