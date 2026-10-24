@@ -13,6 +13,7 @@ struct ScreenshotScanView: View {
     @State private var viewModel = ScreenshotScanViewModel()
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var previewImage: UIImage?
+    @State private var isDropTargeted = false
     @FocusState private var isTextFocused: Bool
 
     var body: some View {
@@ -59,6 +60,21 @@ struct ScreenshotScanView: View {
         }
         .onChange(of: selectedPhoto) { _, item in
             loadPhoto(item)
+        }
+        .dropDestination(for: DroppedImage.self) { images, _ in
+            guard let image = images.first else { return false }
+            Task { await process(imageData: image.data) }
+            return true
+        } isTargeted: { isTargeted in
+            isDropTargeted = isTargeted
+        }
+        .overlay {
+            if isDropTargeted {
+                RoundedRectangle(cornerRadius: 16)
+                    .strokeBorder(.tint, lineWidth: 4)
+                    .padding(8)
+                    .allowsHitTesting(false)
+            }
         }
     }
 
@@ -121,9 +137,13 @@ struct ScreenshotScanView: View {
         Task {
             defer { selectedPhoto = nil }
             let data = (try? await item.loadTransferable(type: Data.self)) ?? Data()
-            previewImage = UIImage(data: data)
-            await viewModel.recognize(imageData: data)
+            await process(imageData: data)
         }
+    }
+
+    private func process(imageData: Data) async {
+        previewImage = UIImage(data: imageData)
+        await viewModel.recognize(imageData: imageData)
     }
 }
 

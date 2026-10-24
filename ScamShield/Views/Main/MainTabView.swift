@@ -7,63 +7,52 @@
 
 import SwiftUI
 
+//the compact layout used on iPhone and narrow iPad windows
 struct MainTabView: View {
 
-    enum Tab: Hashable {
-        case home, history, community, settings
+    @Binding var selection: AppSection
+
+    //the scan screens live inside Home on a phone, so they select the Home tab
+    private var tabSelection: Binding<AppSection> {
+        Binding(get: { selection.compactTab }, set: { selection = $0 })
     }
 
-    @Environment(AppServices.self) private var services
-    @AppStorage(AppSettings.alertsEnabled) private var alertsEnabled = true
-    @State private var selection: Tab = .home
-
     var body: some View {
-        @Bindable var router = services.router
-
         //each tab has its own navigation stack so going back stays inside that tab
-        TabView(selection: $selection) {
+        TabView(selection: tabSelection) {
             NavigationStack {
                 DashboardView()
             }
-            .tabItem { Label("Home", systemImage: "house.fill") }
-            .tag(Tab.home)
+            .tabItem { label(for: .home) }
+            .tag(AppSection.home)
 
             NavigationStack {
                 HistoryView()
             }
-            .tabItem { Label("History", systemImage: "clock.fill") }
-            .tag(Tab.history)
+            .tabItem { label(for: .history) }
+            .tag(AppSection.history)
 
             NavigationStack {
                 CommunityView()
             }
-            .tabItem { Label("Community", systemImage: "person.3.fill") }
-            .tag(Tab.community)
+            .tabItem { label(for: .community) }
+            .tag(AppSection.community)
 
             NavigationStack {
                 SettingsView()
             }
-            .tabItem { Label("Settings", systemImage: "gearshape.fill") }
-            .tag(Tab.settings)
+            .tabItem { label(for: .settings) }
+            .tag(AppSection.settings)
         }
-        .task {
-            if alertsEnabled { _ = await services.notifications.requestPermission() }
-        }
-        .sheet(item: $router.openedScan) { scan in
-            NavigationStack {
-                ResultView(result: scan)
-                    .toolbar {
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Done") { router.openedScan = nil }
-                        }
-                    }
-            }
-        }
+    }
+
+    private func label(for section: AppSection) -> some View {
+        Label(section.title, systemImage: section.systemImage)
     }
 }
 
 #Preview {
-    MainTabView()
+    MainTabView(selection: .constant(.home))
         .environment(AuthViewModel(service: PreviewAuthService()))
         .environment(AppLockViewModel())
         .environment(AppServices())

@@ -186,6 +186,68 @@ struct HistoryViewModelTests {
         #expect(try history.fetchAll().isEmpty)
     }
 
+    @Test func nothingIsSelectedAtFirst() throws {
+        try save("a.com")
+        viewModel.load()
+        #expect(viewModel.selectedScan == nil)
+    }
+
+    @Test func selectedScanIsFoundInTheLoadedList() throws {
+        let scan = try save("a.com", hoursAgo: 1)
+        try save("b.com", hoursAgo: 2)
+        viewModel.load()
+
+        viewModel.selectedScanID = scan.id
+        #expect(viewModel.selectedScan?.id == scan.id)
+    }
+
+    @Test func deletingTheSelectedScanClearsTheSelection() throws {
+        let scan = try save("a.com")
+        viewModel.load()
+        viewModel.selectedScanID = scan.id
+
+        viewModel.delete(id: scan.id)
+        #expect(viewModel.selectedScanID == nil)
+    }
+
+    @Test func deletingAnotherScanKeepsTheSelection() throws {
+        let kept = try save("a.com", hoursAgo: 1)
+        let other = try save("b.com", hoursAgo: 2)
+        viewModel.load()
+        viewModel.selectedScanID = kept.id
+
+        viewModel.delete(id: other.id)
+        #expect(viewModel.selectedScanID == kept.id)
+    }
+
+    @Test func clearingEverythingClearsTheSelection() throws {
+        let scan = try save("a.com")
+        viewModel.load()
+        viewModel.selectedScanID = scan.id
+
+        viewModel.deleteAll()
+        #expect(viewModel.selectedScanID == nil)
+    }
+
+    @Test func reloadingAfterTheScanVanishedClearsTheSelection() throws {
+        let scan = try save("a.com")
+        viewModel.load()
+        viewModel.selectedScanID = scan.id
+
+        try history.delete(id: scan.id)
+        viewModel.load()
+        #expect(viewModel.selectedScanID == nil)
+    }
+
+    @Test func filteringDoesNotLoseTheSelection() throws {
+        let scan = try save("a.com")
+        viewModel.load()
+        viewModel.selectedScanID = scan.id
+
+        viewModel.searchText = "no match anywhere"
+        #expect(viewModel.selectedScan?.id == scan.id)
+    }
+
     @Test func failedLoadShowsError() {
         let failing = HistoryViewModel(history: FailingHistoryStore(), calendar: calendar)
         failing.load()

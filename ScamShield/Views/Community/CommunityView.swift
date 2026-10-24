@@ -66,6 +66,7 @@ struct CommunityView: View {
                 .background(isSelected ? Color.accentColor : Color(.secondarySystemFill), in: Capsule())
         }
         .buttonStyle(.plain)
+        .hoverEffect(.highlight)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 

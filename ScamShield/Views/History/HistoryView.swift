@@ -9,11 +9,52 @@ import SwiftUI
 
 struct HistoryView: View {
 
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var viewModel = HistoryViewModel()
     @State private var isConfirmingClear = false
 
+    //a wide window shows the list and the chosen result side by side instead of pushing a new screen
+    private var showsTwoPanes: Bool {
+        sizeClass == .regular
+    }
+
     var body: some View {
-        List {
+        content
+            .navigationTitle("History")
+            .navigationDestination(for: ScanResult.self) { scan in
+                ResultView(result: scan)
+            }
+            .searchable(text: $viewModel.searchText, prompt: "Search links")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) { optionsMenu }
+            }
+            .confirmationDialog("Delete all scan history?", isPresented: $isConfirmingClear, titleVisibility: .visible) {
+                Button("Delete All", role: .destructive) {
+                    viewModel.deleteAll()
+                }
+            } message: {
+                Text("This cannot be undone.")
+            }
+            .onAppear { viewModel.load() }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if showsTwoPanes {
+            HStack(spacing: 0) {
+                scanList
+                    .frame(width: 360)
+                Divider()
+                detailPane
+                    .frame(maxWidth: .infinity)
+            }
+        } else {
+            scanList
+        }
+    }
+
+    private var scanList: some View {
+        List(selection: $viewModel.selectedScanID) {
             if let error = viewModel.errorMessage {
                 Label(error, systemImage: "exclamationmark.triangle.fill")
                     .foregroundStyle(.red)
@@ -22,38 +63,48 @@ struct HistoryView: View {
             ForEach(viewModel.groups) { group in
                 Section(viewModel.title(for: group.day)) {
                     ForEach(group.scans) { scan in
-                        NavigationLink(value: scan) {
-                            ScanRow(scan: scan)
-                        }
-                        .swipeActions {
-                            Button(role: .destructive) {
-                                viewModel.delete(id: scan.id)
-                            } label: {
-                                Label("Delete", systemImage: "trash")
+                        row(for: scan)
+                            .swipeActions {
+                                Button(role: .destructive) {
+                                    viewModel.delete(id: scan.id)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
                             }
-                        }
                     }
                 }
             }
         }
         .overlay { emptyState }
-        .navigationTitle("History")
-        .navigationDestination(for: ScanResult.self) { scan in
-            ResultView(result: scan)
-        }
-        .searchable(text: $viewModel.searchText, prompt: "Search links")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) { optionsMenu }
-        }
-        .confirmationDialog("Delete all scan history?", isPresented: $isConfirmingClear, titleVisibility: .visible) {
-            Button("Delete All", role: .destructive) {
-                viewModel.deleteAll()
-            }
-        } message: {
-            Text("This cannot be undone.")
-        }
-        .onAppear { viewModel.load() }
         .refreshable { viewModel.load() }
+    }
+
+    @ViewBuilder
+    private func row(for scan: ScanResult) -> some View {
+        if showsTwoPanes {
+            ScanRow(scan: scan)
+                .tag(scan.id)
+        } else {
+            NavigationLink(value: scan) {
+                ScanRow(scan: scan)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var detailPane: some View {
+        if let scan = viewModel.selectedScan {
+            NavigationStack {
+                ResultView(result: scan)
+            }
+            .id(scan.id)
+        } else {
+            ContentUnavailableView(
+                "Select a Scan",
+                systemImage: "doc.text.magnifyingglass",
+                description: Text("Choose a scan from the list to see why it was rated this way.")
+            )
+        }
     }
 
     private var optionsMenu: some View {

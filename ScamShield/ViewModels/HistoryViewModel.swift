@@ -21,6 +21,9 @@ final class HistoryViewModel {
     var typeFilter: ScanType?
     var riskFilter: RiskLevel?
 
+    //the scan shown beside the list when the screen is wide enough for two panes
+    var selectedScanID: UUID?
+
     private(set) var scans: [ScanResult] = []
     private(set) var errorMessage: String?
 
@@ -54,9 +57,15 @@ final class HistoryViewModel {
             .sorted { $0.day > $1.day }
     }
 
+    var selectedScan: ScanResult? {
+        guard let selectedScanID else { return nil }
+        return scans.first { $0.id == selectedScanID }
+    }
+
     func load() {
         do {
             scans = try history.fetchAll()
+            dropMissingSelection()
             errorMessage = nil
         } catch {
             errorMessage = "Could not load your scan history."
@@ -67,6 +76,7 @@ final class HistoryViewModel {
         do {
             try history.delete(id: id)
             scans.removeAll { $0.id == id }
+            dropMissingSelection()
             errorMessage = nil
         } catch {
             errorMessage = "Could not delete that scan."
@@ -77,9 +87,16 @@ final class HistoryViewModel {
         do {
             try history.deleteAll()
             scans = []
+            dropMissingSelection()
             errorMessage = nil
         } catch {
             errorMessage = "Could not clear your scan history."
+        }
+    }
+
+    private func dropMissingSelection() {
+        if let selectedScanID, !scans.contains(where: { $0.id == selectedScanID }) {
+            self.selectedScanID = nil
         }
     }
 

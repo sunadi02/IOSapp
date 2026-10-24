@@ -33,5 +33,8 @@ struct ScamShieldApp: App {
                     }
                 }
         }
+        .commands {
+            AppCommands()
+        }
     }
 }

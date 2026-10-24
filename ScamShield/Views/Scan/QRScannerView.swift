@@ -48,6 +48,11 @@ struct QRScannerView: View {
         .onChange(of: selectedPhoto) { _, item in
             loadPhoto(item)
         }
+        .dropDestination(for: DroppedImage.self) { images, _ in
+            guard let image = images.first else { return false }
+            Task { await viewModel.scan(photoData: image.data) }
+            return true
+        }
     }
 
     @ViewBuilder

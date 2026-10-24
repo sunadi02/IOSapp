@@ -25,7 +25,7 @@ struct ContentView: View {
             if !hasSeenOnboarding {
                 OnboardingView { hasSeenOnboarding = true }
             } else if auth.isSignedIn {
-                MainTabView()
+                AdaptiveMainView()
             } else {
                 AuthView()
             }

@@ -93,6 +93,7 @@ struct DashboardView: View {
                                 .padding()
                         }
                         .buttonStyle(.plain)
+                        .hoverEffect(.highlight)
 
                         if scan.id != viewModel.recentScans.last?.id {
                             Divider().padding(.leading, 56)
@@ -158,6 +159,7 @@ struct QuickActionRow: View {
         }
         .padding()
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+        .hoverEffect(.lift)
         .accessibilityElement(children: .combine)
     }
 }
