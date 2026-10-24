@@ -214,6 +214,7 @@ final class MockRemoteHistory: RemoteHistoryStoring {
 final class MockCommunityService: CommunityReporting {
     var counts: [String: Int] = [:]
     var countError: Error?
+    var countDelay: Duration?
     var submitError: Error?
     var feed: [ScamReport] = []
     var feedError: Error?
@@ -227,6 +228,7 @@ final class MockCommunityService: CommunityReporting {
 
     func reportCount(forDomain domain: String) async throws -> Int {
         queriedDomains.append(domain)
+        if let countDelay { try? await Task.sleep(for: countDelay) }
         if let countError { throw countError }
         return counts[domain] ?? 0
     }

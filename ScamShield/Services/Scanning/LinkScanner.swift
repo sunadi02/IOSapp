@@ -20,14 +20,23 @@ struct LinkScanner {
 
     static let onlineCheckUnavailableTitle = "Online check unavailable"
 
+    //a slow or offline community lookup must never hold up the answer, so it is given a few seconds at most
+    static let communityTimeout = 4.0
+
     let analyzer = URLAnalyzer()
     let reputation: LinkReputationChecking
     let community: CommunityReporting?
+    let communityTimeout: Double
 
     //community lookups are off unless asked for so tests never reach firestore
-    init(reputation: LinkReputationChecking = SafeBrowsingService(), community: CommunityReporting? = nil) {
+    init(
+        reputation: LinkReputationChecking = SafeBrowsingService(),
+        community: CommunityReporting? = nil,
+        communityTimeout: Double = LinkScanner.communityTimeout
+    ) {
         self.reputation = reputation
         self.community = community
+        self.communityTimeout = communityTimeout
     }
 
     static var live: LinkScanner {
@@ -76,8 +85,12 @@ struct LinkScanner {
 
     private func communityReports(for url: URL) async -> (domain: String, count: Int)? {
         guard let community, let domain = CommunityDomain.name(for: url) else { return nil }
-        guard let count = try? await community.reportCount(forDomain: domain) else { return nil }
-        return (domain, count)
+
+        let count = await Timeout.run(after: communityTimeout) {
+            try? await community.reportCount(forDomain: domain)
+        }
+        guard let count else { return nil }
+        return (domain: domain, count: count)
     }
 
     static func friendlyName(for threat: String) -> String {

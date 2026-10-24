@@ -58,6 +58,28 @@ struct LinkScannerCommunityTests {
         #expect(result.riskLevel == .safe)
     }
 
+    @Test func slowCommunityLookupDoesNotHoldUpTheResult() async throws {
+        community.counts["example.com"] = 3
+        community.countDelay = .seconds(3)
+        let slowScanner = LinkScanner(reputation: MockReputationChecker(), community: community, communityTimeout: 0.05)
+
+        let started = Date()
+        let result = try await slowScanner.scan("https://example.com")
+
+        #expect(Date().timeIntervalSince(started) < 2)
+        #expect(!result.signals.contains { $0.title == "Reported by the community" })
+        #expect(result.riskLevel == .safe)
+    }
+
+    @Test func quickCommunityLookupStillCounts() async throws {
+        community.counts["example.com"] = 2
+        community.countDelay = .milliseconds(10)
+        let scanner = LinkScanner(reputation: MockReputationChecker(), community: community, communityTimeout: 2)
+
+        let result = try await scanner.scan("https://example.com")
+        #expect(result.signals.contains { $0.title == "Reported by the community" })
+    }
+
     @Test func subdomainsLookUpTheRegisteredDomain() async throws {
         _ = try await scanner.scan("https://login.secure.evil.com/path?token=1")
         #expect(community.queriedDomains == ["evil.com"])

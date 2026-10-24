@@ -97,7 +97,10 @@ nonisolated final class CameraSession: NSObject, CameraControlling, AVCaptureVid
         onCode?(code)
     }
 
+    //the screen asks again every time it appears, but the camera is only wired up the first time
     private func buildSession() -> CameraSetupResult {
+        if device != nil { return .ready }
+
         guard let device = AVCaptureDevice.default(for: .video),
               let input = try? AVCaptureDeviceInput(device: device),
               session.canAddInput(input),
@@ -106,7 +109,9 @@ nonisolated final class CameraSession: NSObject, CameraControlling, AVCaptureVid
         }
 
         session.beginConfiguration()
-        session.sessionPreset = .hd1280x720
+        if session.canSetSessionPreset(.hd1280x720) {
+            session.sessionPreset = .hd1280x720
+        }
         session.addInput(input)
         output.alwaysDiscardsLateVideoFrames = true
         output.setSampleBufferDelegate(self, queue: queue)
