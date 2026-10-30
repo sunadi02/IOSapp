@@ -34,6 +34,7 @@ struct CommunityView: View {
                 }
             }
         }
+        .gradientList()
         .overlay { stateOverlay }
         .navigationTitle("Community")
         .task { await viewModel.listen() }

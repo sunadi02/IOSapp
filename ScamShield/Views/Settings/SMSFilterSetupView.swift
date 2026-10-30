@@ -77,6 +77,7 @@ struct SMSFilterSetupView: View {
                 Text("This runs the same rules the filter uses. Nothing you type here leaves your phone.")
             }
         }
+        .gradientList()
         .navigationTitle("SMS Scam Filter")
         .navigationBarTitleDisplayMode(.inline)
     }

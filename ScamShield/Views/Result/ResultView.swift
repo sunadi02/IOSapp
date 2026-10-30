@@ -29,6 +29,7 @@ struct ResultView: View {
             Section {
                 summary
             }
+            .listRowBackground(result.riskLevel.color.opacity(0.12))
 
             Section(result.type == .screenshot ? "Message" : "Checked") {
                 if result.type == .screenshot {
@@ -71,6 +72,7 @@ struct ResultView: View {
                 }
             }
         }
+        .gradientList()
         .navigationTitle("Result")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $isReporting) {

@@ -16,15 +16,10 @@ struct DashboardView: View {
     @State private var clipboard = ClipboardLinkViewModel()
     @State private var copiedLink: String?
 
-    //cards wrap onto more rows when text is large or the screen is narrow
-    private let statColumns = [GridItem(.adaptive(minimum: 150), spacing: 12)]
-
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                Text(viewModel.greeting(name: auth.user?.displayName))
-                    .font(.title2.bold())
-                    .accessibilityAddTraits(.isHeader)
+                hero
 
                 if clipboard.showsCard {
                     CopiedLinkCard { link in
@@ -36,11 +31,7 @@ struct DashboardView: View {
                     .transition(.opacity)
                 }
 
-                LazyVGrid(columns: statColumns, spacing: 12) {
-                    StatCard(title: "Scans today", value: viewModel.scansToday, systemImage: "magnifyingglass", color: .blue)
-                    StatCard(title: "Risky today", value: viewModel.riskyToday, systemImage: "xmark.shield.fill", color: .red)
-                    StatCard(title: "Total scans", value: viewModel.totalScans, systemImage: "clock.fill", color: .purple)
-                }
+                stats
 
                 WeeklyChartCard(
                     breakdown: viewModel.weeklyBreakdown,
@@ -56,8 +47,9 @@ struct DashboardView: View {
             .frame(maxWidth: .infinity)
             .animation(reduceMotion ? nil : .default, value: clipboard.showsCard)
         }
-        .background(Color(.systemGroupedBackground))
+        .appBackground()
         .navigationTitle("ScamShield")
+        .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: ScanResult.self) { scan in
             ResultView(result: scan)
         }
@@ -73,6 +65,63 @@ struct DashboardView: View {
                 Task { await clipboard.refresh() }
             }
         }
+    }
+
+    private var stats: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) { statCards }
+            VStack(spacing: 12) { statCards }
+        }
+    }
+
+    @ViewBuilder
+    private var statCards: some View {
+        StatCard(title: "Scans today", value: viewModel.scansToday, systemImage: "magnifyingglass", color: .blue)
+        StatCard(title: "Risky today", value: viewModel.riskyToday, systemImage: "xmark.shield.fill", color: .red)
+        StatCard(title: "Total scans", value: viewModel.totalScans, systemImage: "clock.fill", color: .indigo)
+    }
+
+    private var heroSubtitle: String {
+        if viewModel.scansToday == 0 {
+            return "Check a link, QR code or message before you act on it."
+        }
+        return "\(viewModel.scansToday) checked today, \(viewModel.riskyToday) risky."
+    }
+
+    private var hero: some View {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
+                BrandAccentBar()
+                Text(viewModel.greeting(name: auth.user?.displayName))
+                    .font(.title2.bold())
+                    .foregroundStyle(.white)
+                    .accessibilityAddTraits(.isHeader)
+                Text(heroSubtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.85))
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "checkmark.shield.fill")
+                .font(.system(size: 44))
+                .foregroundStyle(Color.brandCyan)
+                .shadow(color: .brandCyan.opacity(0.6), radius: 14)
+                .accessibilityHidden(true)
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            ZStack {
+                LinearGradient.brand
+                Circle()
+                    .fill(Color.brandCyan.opacity(0.2))
+                    .frame(width: 180, height: 180)
+                    .blur(radius: 40)
+                    .offset(x: 120, y: 60)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        }
+        .shadow(color: .brandBlue.opacity(0.35), radius: 14, y: 6)
+        .accessibilityElement(children: .combine)
     }
 
     private var quickActions: some View {
@@ -122,7 +171,7 @@ struct DashboardView: View {
                     systemImage: "shield",
                     description: Text("Check a link to see your results here.")
                 )
-                .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+                .cardBackground()
             } else {
                 VStack(spacing: 0) {
                     ForEach(viewModel.recentScans) { scan in
@@ -138,7 +187,7 @@ struct DashboardView: View {
                         }
                     }
                 }
-                .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+                .cardBackground()
             }
         }
     }
@@ -157,6 +206,8 @@ struct StatCard: View {
             Image(systemName: systemImage)
                 .foregroundStyle(color)
                 .font(.title3)
+                .frame(width: 40, height: 40)
+                .background(color.opacity(0.15), in: Circle())
                 .accessibilityHidden(true)
             Text("\(value)")
                 .font(.title.bold())
@@ -165,10 +216,12 @@ struct StatCard: View {
             Text(title)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+        .frame(maxWidth: .infinity, minHeight: 0, alignment: .leading)
+        .padding(14)
+        .cardBackground()
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title): \(value)")
     }
@@ -179,17 +232,11 @@ struct QuickActionRow: View {
     let subtitle: String
     let systemImage: String
 
-    //the coloured square grows with the text size so large text does not squash the icon
     @ScaledMetric(relativeTo: .title2) private var iconSize = 48
 
     var body: some View {
         HStack(spacing: 16) {
-            Image(systemName: systemImage)
-                .font(.title2)
-                .foregroundStyle(.white)
-                .frame(width: iconSize, height: iconSize)
-                .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 12))
-                .accessibilityHidden(true)
+            BrandIconTile(systemImage: systemImage, size: iconSize)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.headline)
@@ -203,7 +250,7 @@ struct QuickActionRow: View {
                 .accessibilityHidden(true)
         }
         .padding()
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+        .cardBackground()
         .hoverEffect(.lift)
         .accessibilityElement(children: .combine)
     }

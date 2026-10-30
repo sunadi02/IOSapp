@@ -11,48 +11,49 @@ struct LockView: View {
 
     let lock: AppLockViewModel
 
-    @ScaledMetric(relativeTo: .largeTitle) private var iconSize = 64
+    @ScaledMetric(relativeTo: .largeTitle) private var iconSize = 96
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                Image(systemName: "lock.shield.fill")
-                    .font(.system(size: iconSize))
-                    .foregroundStyle(.tint)
-                    .accessibilityHidden(true)
+        ZStack {
+            BrandBackground()
 
-                Text("ScamShield is locked")
-                    .font(.title2.bold())
+            ScrollView {
+                VStack(spacing: 20) {
+                    BrandEmblem(systemImage: "lock.shield.fill", size: iconSize)
+                        .padding(.bottom, 24)
 
-                Text("Unlock to see your scan history.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    Text("ScamShield is locked")
+                        .font(.title.bold())
+                        .foregroundStyle(.white)
 
-                if let error = lock.errorMessage {
-                    Label(error, systemImage: "exclamationmark.triangle.fill")
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .multilineTextAlignment(.center)
+                    Text("Unlock to see your scan history.")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.8))
+
+                    if let error = lock.errorMessage {
+                        Label(error, systemImage: "exclamationmark.triangle.fill")
+                            .font(.footnote)
+                            .foregroundStyle(Color.brandErrorText)
+                            .multilineTextAlignment(.center)
+                    }
+
+                    Button {
+                        Task { await lock.unlock() }
+                    } label: {
+                        Label("Unlock with \(lock.methodName)", systemImage: lock.kind.systemImage)
+                    }
+                    .buttonStyle(.brandPrimary)
+                    .disabled(lock.isAuthenticating)
+                    .padding(.top, 8)
                 }
-
-                Button {
-                    Task { await lock.unlock() }
-                } label: {
-                    Label("Unlock with \(lock.methodName)", systemImage: lock.kind.systemImage)
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .disabled(lock.isAuthenticating)
+                .multilineTextAlignment(.center)
+                .padding(32)
+                .padding(.top, 64)
+                .frame(maxWidth: 420)
+                .frame(maxWidth: .infinity)
             }
-            .multilineTextAlignment(.center)
-            .padding(32)
-            .padding(.top, 64)
-            .frame(maxWidth: 420)
-            .frame(maxWidth: .infinity)
         }
-        .background(Color(.systemBackground))
+        .preferredColorScheme(.dark)
         .accessibilityAddTraits(.isModal)
     }
 }

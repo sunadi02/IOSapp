@@ -14,6 +14,7 @@ struct SettingsView: View {
     @Environment(AppServices.self) private var services
     @AppStorage(AppSettings.alertsEnabled) private var alertsEnabled = true
     @AppStorage(AppSettings.hapticsEnabled) private var hapticsEnabled = true
+    @AppStorage(AppSettings.appearance) private var appearance = AppearanceMode.system
     @State private var viewModel = SettingsViewModel()
     @State private var isEditingName = false
     @State private var isConfirmingClear = false
@@ -51,6 +52,19 @@ struct SettingsView: View {
                 Text("Notifications")
             } footer: {
                 Text(viewModel.alertsMessage ?? "Get notified if a link you checked earlier is later reported as a scam.")
+            }
+
+            Section {
+                Picker("Theme", selection: $appearance) {
+                    ForEach(AppearanceMode.allCases) { mode in
+                        Text(mode.title).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+            } header: {
+                Text("Appearance")
+            } footer: {
+                Text("Choose light or dark, or follow your iPhone's setting.")
             }
 
             Section {
@@ -131,6 +145,7 @@ struct SettingsView: View {
                 .accessibilityIdentifier(AccessibilityID.signOut)
             }
         }
+        .gradientList()
         .navigationTitle("Settings")
         .onAppear {
             isLockOn = lock.isEnabled

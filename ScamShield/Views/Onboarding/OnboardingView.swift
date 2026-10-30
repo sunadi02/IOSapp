@@ -19,7 +19,7 @@ struct OnboardingView: View {
     var onFinish: () -> Void
 
     @State private var currentPage = 0
-    @ScaledMetric(relativeTo: .largeTitle) private var iconSize = 80
+    @ScaledMetric(relativeTo: .largeTitle) private var iconSize = 120
 
     static let pages = [
         OnboardingPage(id: 0, systemImage: "link.badge.plus", title: "Check any link",
@@ -35,56 +35,73 @@ struct OnboardingView: View {
     private var isLastPage: Bool { currentPage == Self.pages.count - 1 }
 
     var body: some View {
-        VStack(spacing: 24) {
-            HStack {
-                Spacer()
-                Button("Skip", action: onFinish)
-                    .opacity(isLastPage ? 0 : 1)
-                    .disabled(isLastPage)
-                    .accessibilityHidden(isLastPage)
-            }
-            .padding(.horizontal)
+        ZStack {
+            BrandBackground()
 
-            TabView(selection: $currentPage) {
-                ForEach(Self.pages) { page in
-                    pageView(page).tag(page.id)
+            VStack(spacing: 24) {
+                HStack {
+                    Spacer()
+                    Button("Skip", action: onFinish)
+                        .foregroundStyle(.white.opacity(0.85))
+                        .opacity(isLastPage ? 0 : 1)
+                        .disabled(isLastPage)
+                        .accessibilityHidden(isLastPage)
                 }
-            }
-            .tabViewStyle(.page(indexDisplayMode: .always))
-            .indexViewStyle(.page(backgroundDisplayMode: .always))
+                .padding(.horizontal)
 
-            Button {
-                if isLastPage {
-                    onFinish()
-                } else {
-                    withAnimation { currentPage += 1 }
+                TabView(selection: $currentPage) {
+                    ForEach(Self.pages) { page in
+                        pageView(page).tag(page.id)
+                    }
                 }
-            } label: {
-                Text(isLastPage ? "Get Started" : "Next")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
+                .tabViewStyle(.page(indexDisplayMode: .never))
+
+                pageDots
+
+                Button {
+                    if isLastPage {
+                        onFinish()
+                    } else {
+                        withAnimation { currentPage += 1 }
+                    }
+                } label: {
+                    Text(isLastPage ? "Get Started" : "Next")
+                }
+                .buttonStyle(.brandPrimary)
+                .padding(.horizontal, 24)
+                .padding(.bottom)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .padding(.horizontal)
-            .padding(.bottom)
+            .frame(maxWidth: 600)
         }
-        .frame(maxWidth: 600)
+        .preferredColorScheme(.dark)
+    }
+
+    private var pageDots: some View {
+        HStack(spacing: 8) {
+            ForEach(Self.pages) { page in
+                Capsule()
+                    .fill(page.id == currentPage ? Color.brandCyan : Color.white.opacity(0.35))
+                    .frame(width: page.id == currentPage ? 24 : 8, height: 8)
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: currentPage)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Page \(currentPage + 1) of \(Self.pages.count)")
     }
 
     private func pageView(_ page: OnboardingPage) -> some View {
         VStack(spacing: 20) {
             Spacer()
-            Image(systemName: page.systemImage)
-                .font(.system(size: iconSize))
-                .foregroundStyle(.tint)
-                .accessibilityHidden(true)
+            BrandEmblem(systemImage: page.systemImage, size: iconSize)
+                .padding(.bottom, 24)
+            BrandAccentBar()
             Text(page.title)
-                .font(.title.bold())
+                .font(.largeTitle.bold())
+                .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
             Text(page.message)
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Spacer()

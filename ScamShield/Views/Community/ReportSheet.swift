@@ -57,6 +57,7 @@ struct ReportSheet: View {
                     Text("Only the website address is shared, without anything after a question mark. Your name and email are never shown to other people.")
                 }
             }
+            .gradientList()
             .navigationTitle("Report Scam")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

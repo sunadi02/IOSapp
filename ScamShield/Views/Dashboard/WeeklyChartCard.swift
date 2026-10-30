@@ -32,7 +32,7 @@ struct WeeklyChartCard: View {
                 }
             }
             .padding()
-            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+            .cardBackground()
         }
     }
 

@@ -16,97 +16,103 @@ struct AuthView: View {
     }
 
     @FocusState private var focusedField: Field?
-    @ScaledMetric(relativeTo: .largeTitle) private var logoSize = 64
+    @ScaledMetric(relativeTo: .largeTitle) private var logoSize = 96
 
     var body: some View {
         @Bindable var auth = auth
 
-        ScrollView {
-            VStack(spacing: 24) {
-                header
+        ZStack {
+            BrandBackground()
 
-                Picker("Mode", selection: $auth.mode) {
-                    Text("Sign In").tag(AuthViewModel.Mode.signIn)
-                    Text("Create Account").tag(AuthViewModel.Mode.signUp)
-                }
-                .pickerStyle(.segmented)
+            ScrollView {
+                VStack(spacing: 24) {
+                    header
 
-                VStack(spacing: 12) {
-                    if auth.mode == .signUp {
-                        TextField("Full name", text: $auth.name)
-                            .textContentType(.name)
-                            .focused($focusedField, equals: .name)
-                            .submitLabel(.next)
+                    Picker("Mode", selection: $auth.mode) {
+                        Text("Sign In").tag(AuthViewModel.Mode.signIn)
+                        Text("Create Account").tag(AuthViewModel.Mode.signUp)
                     }
+                    .pickerStyle(.segmented)
 
-                    TextField("Email", text: $auth.email)
-                        .textContentType(.emailAddress)
-                        .keyboardType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .focused($focusedField, equals: .email)
-                        .submitLabel(.next)
-                        .accessibilityIdentifier(AccessibilityID.authEmail)
+                    VStack(spacing: 12) {
+                        if auth.mode == .signUp {
+                            TextField("Full name", text: $auth.name, prompt: prompt("Full name"))
+                                .textContentType(.name)
+                                .focused($focusedField, equals: .name)
+                                .submitLabel(.next)
+                                .brandField()
+                        }
 
-                    SecureField("Password", text: $auth.password)
-                        .textContentType(auth.mode == .signUp ? .newPassword : .password)
-                        .focused($focusedField, equals: .password)
-                        .submitLabel(.go)
-                        .accessibilityIdentifier(AccessibilityID.authPassword)
-                }
-                .textFieldStyle(.roundedBorder)
-                .onSubmit(moveToNextField)
+                        TextField("Email", text: $auth.email, prompt: prompt("Email"))
+                            .textContentType(.emailAddress)
+                            .keyboardType(.emailAddress)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .focused($focusedField, equals: .email)
+                            .submitLabel(.next)
+                            .brandField()
+                            .accessibilityIdentifier(AccessibilityID.authEmail)
 
-                messages
+                        SecureField("Password", text: $auth.password, prompt: prompt("Password"))
+                            .textContentType(auth.mode == .signUp ? .newPassword : .password)
+                            .focused($focusedField, equals: .password)
+                            .submitLabel(.go)
+                            .brandField()
+                            .accessibilityIdentifier(AccessibilityID.authPassword)
+                    }
+                    .onSubmit(moveToNextField)
 
-                Button {
-                    focusedField = nil
-                    Task { await auth.submit() }
-                } label: {
-                    Group {
+                    messages
+
+                    Button {
+                        focusedField = nil
+                        Task { await auth.submit() }
+                    } label: {
                         if auth.isLoading {
-                            ProgressView()
+                            ProgressView().tint(Color.brandNavy)
                         } else {
                             Text(auth.mode == .signIn ? "Sign In" : "Create Account")
                         }
                     }
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .disabled(auth.isLoading)
-                .accessibilityIdentifier(AccessibilityID.authSubmit)
-
-                if auth.mode == .signIn {
-                    Button("Forgot password?") {
-                        Task { await auth.resetPassword() }
-                    }
-                    .font(.subheadline)
+                    .buttonStyle(.brandPrimary)
                     .disabled(auth.isLoading)
+                    .accessibilityIdentifier(AccessibilityID.authSubmit)
+
+                    if auth.mode == .signIn {
+                        Button("Forgot password?") {
+                            Task { await auth.resetPassword() }
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(Color.brandCyan)
+                        .disabled(auth.isLoading)
+                    }
                 }
+                .padding(24)
+                .frame(maxWidth: 500)
+                .frame(maxWidth: .infinity)
             }
-            .padding(24)
-            .frame(maxWidth: 500)
-            .frame(maxWidth: .infinity)
+            .scrollDismissesKeyboard(.interactively)
         }
-        .scrollDismissesKeyboard(.interactively)
+        .preferredColorScheme(.dark)
         .animation(.default, value: auth.mode)
         .announceWhenSet(auth.errorMessage)
         .announceWhenSet(auth.infoMessage)
     }
 
+    private func prompt(_ text: String) -> Text {
+        Text(text).foregroundStyle(.white.opacity(0.55))
+    }
+
     private var header: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "shield.lefthalf.filled")
-                .font(.system(size: logoSize))
-                .foregroundStyle(.tint)
-                .accessibilityHidden(true)
+        VStack(spacing: 12) {
+            BrandEmblem(systemImage: "shield.lefthalf.filled", size: logoSize)
+                .padding(.bottom, 20)
             Text("ScamShield")
                 .font(.largeTitle.bold())
+                .foregroundStyle(.white)
             Text(auth.mode == .signIn ? "Welcome back" : "Create an account to sync your scan history")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white.opacity(0.8))
                 .multilineTextAlignment(.center)
         }
         .padding(.top, 32)
@@ -117,13 +123,13 @@ struct AuthView: View {
         if let error = auth.errorMessage {
             Label(error, systemImage: "exclamationmark.triangle.fill")
                 .font(.footnote)
-                .foregroundStyle(.red)
+                .foregroundStyle(Color.brandErrorText)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         if let info = auth.infoMessage {
             Label(info, systemImage: "envelope.fill")
                 .font(.footnote)
-                .foregroundStyle(.green)
+                .foregroundStyle(Color.brandSuccessText)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }

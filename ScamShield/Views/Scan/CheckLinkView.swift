@@ -75,6 +75,7 @@ struct CheckLinkView: View {
             .font(.subheadline)
             .foregroundStyle(.secondary)
         }
+        .gradientList()
         .navigationTitle("Check a Link")
         .announceWhenSet(viewModel.errorMessage)
         .navigationDestination(item: $viewModel.result) { result in

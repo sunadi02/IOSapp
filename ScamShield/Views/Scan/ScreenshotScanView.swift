@@ -53,6 +53,7 @@ struct ScreenshotScanView: View {
                 .disabled(!viewModel.canCheck)
             }
         }
+        .gradientList()
         .navigationTitle("Scan a Screenshot")
         .navigationBarTitleDisplayMode(.inline)
         .announceWhenSet(viewModel.errorMessage)

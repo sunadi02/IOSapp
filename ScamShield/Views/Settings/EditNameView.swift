@@ -41,6 +41,7 @@ struct EditNameView: View {
                     }
                 }
             }
+            .gradientList()
             .navigationTitle("Edit Name")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

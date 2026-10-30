@@ -100,6 +100,7 @@ struct HistoryView: View {
                 }
             }
         }
+        .gradientList()
         .overlay { emptyState }
         .refreshable { viewModel.load() }
     }

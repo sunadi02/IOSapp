@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
 
     @AppStorage(AppSettings.hasSeenOnboarding) private var hasSeenOnboarding = false
+    @AppStorage(AppSettings.appearance) private var appearance = AppearanceMode.system
     @Environment(\.scenePhase) private var scenePhase
     @State private var auth = AuthViewModel()
     @State private var lock = AppLockViewModel()
@@ -30,6 +31,7 @@ struct ContentView: View {
                 AuthView()
             }
         }
+        .preferredColorScheme(appearance.colorScheme)
         .environment(auth)
         .environment(lock)
         .animation(.default, value: hasSeenOnboarding)
