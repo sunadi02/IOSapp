@@ -7,6 +7,7 @@
 
 import Foundation
 import Observation
+import os
 
 @Observable
 final class AppLockViewModel {
@@ -37,7 +38,9 @@ final class AppLockViewModel {
     var isAvailable: Bool { kind != .unavailable }
 
     func lockIfNeeded() {
-        guard isEnabled else { return }
+        Logger(subsystem: "sunadi.ScamShield", category: "AppLock")
+            .info("Leaving app, lock enabled: \(self.isEnabled, privacy: .public), authenticating: \(self.isAuthenticating, privacy: .public)")
+        guard isEnabled, !isAuthenticating else { return }
         isLocked = true
         needsAutoPrompt = true
     }

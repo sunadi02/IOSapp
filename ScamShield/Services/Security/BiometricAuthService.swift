@@ -7,6 +7,7 @@
 
 import Foundation
 import LocalAuthentication
+import os
 
 enum BiometricKind: Equatable {
     case faceID
@@ -38,7 +39,7 @@ enum BiometricError: LocalizedError, Equatable {
 
         switch (error as? LAError)?.code {
         case .userCancel, .systemCancel, .appCancel: self = .cancelled
-        case .passcodeNotSet, .biometryNotAvailable, .biometryNotEnrolled: self = .unavailable
+        case .passcodeNotSet: self = .unavailable
         default: self = .failed
         }
     }
@@ -67,6 +68,9 @@ struct LocalAuthService: BiometricAuthenticating {
         guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
             return .unavailable
         }
+        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else {
+            return .passcodeOnly
+        }
 
         switch context.biometryType {
         case .faceID: return .faceID
@@ -76,12 +80,31 @@ struct LocalAuthService: BiometricAuthenticating {
         }
     }
 
+    static let biometryProblems: Set<LAError.Code> = [.biometryNotAvailable, .biometryNotEnrolled, .biometryLockout]
+    static let log = Logger(subsystem: "sunadi.ScamShield", category: "AppLock")
+
     func authenticate(reason: String) async throws {
+        Self.log.info("Unlock requested, method: \(kind.title, privacy: .public)")
         do {
-            let success = try await LAContext().evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason)
-            if !success { throw BiometricError.failed }
+            try await evaluate(reason: reason)
+        } catch let error as LAError where Self.biometryProblems.contains(error.code) {
+            Self.log.error("Biometrics failed with code \(error.code.rawValue, privacy: .public), retrying")
+            do {
+                try await evaluate(reason: reason)
+            } catch {
+                Self.log.error("Retry failed: \(error.localizedDescription, privacy: .public)")
+                throw BiometricError(error)
+            }
         } catch {
+            Self.log.error("Unlock failed: \(error.localizedDescription, privacy: .public)")
             throw BiometricError(error)
         }
+    }
+
+    private func evaluate(reason: String) async throws {
+        let context = LAContext()
+        context.localizedFallbackTitle = "Use Passcode"
+        let success = try await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason)
+        if !success { throw BiometricError.failed }
     }
 }

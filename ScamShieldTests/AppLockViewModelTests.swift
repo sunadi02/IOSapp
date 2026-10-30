@@ -160,8 +160,8 @@ struct BiometricErrorTests {
         (LAError.Code.systemCancel, BiometricError.cancelled),
         (LAError.Code.appCancel, BiometricError.cancelled),
         (LAError.Code.passcodeNotSet, BiometricError.unavailable),
-        (LAError.Code.biometryNotAvailable, BiometricError.unavailable),
-        (LAError.Code.biometryNotEnrolled, BiometricError.unavailable),
+        (LAError.Code.biometryNotAvailable, BiometricError.failed),
+        (LAError.Code.biometryNotEnrolled, BiometricError.failed),
         (LAError.Code.authenticationFailed, BiometricError.failed),
         (LAError.Code.biometryLockout, BiometricError.failed)
     ])
