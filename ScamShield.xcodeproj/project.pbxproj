@@ -7,12 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8492592E30947D09000466BC /* ScamShieldSMSFilter.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8492592730947D09000466BC /* ScamShieldSMSFilter.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		DF03BCE73088AEA60062CA71 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = DF03BCE63088AE9E0062CA71 /* .gitignore */; };
 		DF86D7AA3088E287003102C6 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = DF86D7A93088E287003102C6 /* FirebaseAuth */; };
 		DF86D7AC3088E287003102C6 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = DF86D7AB3088E287003102C6 /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		8492592C30947D09000466BC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DF03BCD03088ACBB0062CA71 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8492592630947D09000466BC;
+			remoteInfo = ScamShieldSMSFilter;
+		};
 		DF6622D5308B4E2A00129F8B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = DF03BCD03088ACBB0062CA71 /* Project object */;
@@ -29,16 +37,66 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		8492593330947D09000466BC /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				8492592E30947D09000466BC /* ScamShieldSMSFilter.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		8492592730947D09000466BC /* ScamShieldSMSFilter.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ScamShieldSMSFilter.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF03BCD83088ACBB0062CA71 /* ScamShield.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScamShield.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF03BCE63088AE9E0062CA71 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		DF6622D1308B4E2A00129F8B /* ScamShieldTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScamShieldTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DFB2C486308B4A9800A555AC /* ScamShieldUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScamShieldUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		8492592F30947D09000466BC /* Exceptions for "ScamShieldSMSFilter" folder in "ScamShieldSMSFilter" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 8492592630947D09000466BC /* ScamShieldSMSFilter */;
+		};
+		8492593830947E37000466BC /* Exceptions for "ScamShield" folder in "ScamShieldSMSFilter" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/RiskLevel.swift,
+				Models/RiskSignal.swift,
+				Models/ScanResult.swift,
+				Models/ScanType.swift,
+				Services/Analysis/LinkExtractor.swift,
+				Services/Analysis/RiskScorer.swift,
+				Services/Analysis/SMSFilterDecision.swift,
+				Services/Analysis/URLAnalyzer.swift,
+			);
+			target = 8492592630947D09000466BC /* ScamShieldSMSFilter */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		8492592830947D09000466BC /* ScamShieldSMSFilter */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8492592F30947D09000466BC /* Exceptions for "ScamShieldSMSFilter" folder in "ScamShieldSMSFilter" target */,
+			);
+			path = ScamShieldSMSFilter;
+			sourceTree = "<group>";
+		};
 		DF03BCDA3088ACBB0062CA71 /* ScamShield */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8492593830947E37000466BC /* Exceptions for "ScamShield" folder in "ScamShieldSMSFilter" target */,
+			);
 			path = ScamShield;
 			sourceTree = "<group>";
 		};
@@ -55,6 +113,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		8492592430947D09000466BC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DF03BCD53088ACBB0062CA71 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -88,6 +153,7 @@
 				DF03BCDA3088ACBB0062CA71 /* ScamShield */,
 				DFB2C487308B4A9800A555AC /* ScamShieldUITests */,
 				DF6622D2308B4E2A00129F8B /* ScamShieldTests */,
+				8492592830947D09000466BC /* ScamShieldSMSFilter */,
 				DF86D7A73088E137003102C6 /* Frameworks */,
 				DF03BCD93088ACBB0062CA71 /* Products */,
 			);
@@ -99,6 +165,7 @@
 				DF03BCD83088ACBB0062CA71 /* ScamShield.app */,
 				DFB2C486308B4A9800A555AC /* ScamShieldUITests.xctest */,
 				DF6622D1308B4E2A00129F8B /* ScamShieldTests.xctest */,
+				8492592730947D09000466BC /* ScamShieldSMSFilter.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -113,6 +180,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		8492592630947D09000466BC /* ScamShieldSMSFilter */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8492593030947D09000466BC /* Build configuration list for PBXNativeTarget "ScamShieldSMSFilter" */;
+			buildPhases = (
+				8492592330947D09000466BC /* Sources */,
+				8492592430947D09000466BC /* Frameworks */,
+				8492592530947D09000466BC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				8492592830947D09000466BC /* ScamShieldSMSFilter */,
+			);
+			name = ScamShieldSMSFilter;
+			packageProductDependencies = (
+			);
+			productName = ScamShieldSMSFilter;
+			productReference = 8492592730947D09000466BC /* ScamShieldSMSFilter.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		DF03BCD73088ACBB0062CA71 /* ScamShield */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = DF03BCE33088ACBC0062CA71 /* Build configuration list for PBXNativeTarget "ScamShield" */;
@@ -120,10 +209,12 @@
 				DF03BCD43088ACBB0062CA71 /* Sources */,
 				DF03BCD53088ACBB0062CA71 /* Frameworks */,
 				DF03BCD63088ACBB0062CA71 /* Resources */,
+				8492593330947D09000466BC /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				8492592D30947D09000466BC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				DF03BCDA3088ACBB0062CA71 /* ScamShield */,
@@ -190,9 +281,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2620;
+				LastSwiftUpdateCheck = 2710;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
+					8492592630947D09000466BC = {
+						CreatedOnToolsVersion = 27.1;
+					};
 					DF03BCD73088ACBB0062CA71 = {
 						CreatedOnToolsVersion = 26.2;
 					};
@@ -226,11 +320,19 @@
 				DF03BCD73088ACBB0062CA71 /* ScamShield */,
 				DFB2C485308B4A9800A555AC /* ScamShieldUITests */,
 				DF6622D0308B4E2A00129F8B /* ScamShieldTests */,
+				8492592630947D09000466BC /* ScamShieldSMSFilter */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		8492592530947D09000466BC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DF03BCD63088ACBB0062CA71 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -256,6 +358,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		8492592330947D09000466BC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DF03BCD43088ACBB0062CA71 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -280,6 +389,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		8492592D30947D09000466BC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8492592630947D09000466BC /* ScamShieldSMSFilter */;
+			targetProxy = 8492592C30947D09000466BC /* PBXContainerItemProxy */;
+		};
 		DF6622D6308B4E2A00129F8B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = DF03BCD73088ACBB0062CA71 /* ScamShield */;
@@ -293,6 +407,64 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		8492593130947D09000466BC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XAMLWHW3C7;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScamShieldSMSFilter/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ScamShieldSMSFilter;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = sunadi.ScamShield.ScamShieldSMSFilter;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8492593230947D09000466BC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XAMLWHW3C7;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScamShieldSMSFilter/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ScamShieldSMSFilter;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = sunadi.ScamShield.ScamShieldSMSFilter;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		DF03BCE13088ACBC0062CA71 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -563,6 +735,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		8492593030947D09000466BC /* Build configuration list for PBXNativeTarget "ScamShieldSMSFilter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8492593130947D09000466BC /* Debug */,
+				8492593230947D09000466BC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		DF03BCD33088ACBB0062CA71 /* Build configuration list for PBXProject "ScamShield" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
