@@ -137,8 +137,9 @@ struct BrandPrimaryButtonStyle: ButtonStyle {
             .foregroundStyle(Color.brandNavy)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(Color.brandCyan.opacity(isEnabled ? 1 : 0.5), in: Capsule())
-            .shadow(color: .brandCyan.opacity(0.35), radius: 12, y: 4)
+            .background(Color.brandCyan, in: Capsule())
+            .shadow(color: .brandCyan.opacity(isEnabled ? 0.35 : 0), radius: 12, y: 4)
+            .opacity(isEnabled ? 1 : 0.55)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }

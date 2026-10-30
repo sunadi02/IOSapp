@@ -121,9 +121,11 @@ struct QRScannerView: View {
             PhotosPicker(selection: $selectedPhoto, matching: .images) {
                 Label("Scan from Photo", systemImage: "photo")
                     .font(.headline)
+                    .foregroundStyle(Color.brandNavy)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
-                    .background(.regularMaterial, in: Capsule())
+                    .background(Color.brandCyan, in: Capsule())
+                    .shadow(color: .brandCyan.opacity(0.35), radius: 12, y: 4)
             }
         }
         .padding()

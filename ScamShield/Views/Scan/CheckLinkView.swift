@@ -51,20 +51,20 @@ struct CheckLinkView: View {
 
             Section {
                 Button(action: runCheck) {
-                    HStack {
-                        Spacer()
-                        if viewModel.isChecking {
-                            ProgressView()
-                                .accessibilityLabel("Checking link")
-                        } else {
-                            Text("Check Link").bold()
-                        }
-                        Spacer()
+                    if viewModel.isChecking {
+                        ProgressView()
+                            .tint(Color.brandNavy)
+                            .accessibilityLabel("Checking link")
+                    } else {
+                        Label("Check Link", systemImage: "checkmark.shield.fill")
                     }
                 }
+                .buttonStyle(.brandPrimary)
                 .disabled(!viewModel.canCheck)
                 .accessibilityIdentifier(AccessibilityID.checkLinkSubmit)
             }
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets())
 
             Section("What ScamShield checks") {
                 Label("Google's list of known phishing and malware sites", systemImage: "globe")

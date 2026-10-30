@@ -39,19 +39,19 @@ struct ScreenshotScanView: View {
 
             Section {
                 Button(action: runCheck) {
-                    HStack {
-                        Spacer()
-                        if viewModel.isChecking {
-                            ProgressView()
-                                .accessibilityLabel("Checking message")
-                        } else {
-                            Text("Check Message").bold()
-                        }
-                        Spacer()
+                    if viewModel.isChecking {
+                        ProgressView()
+                            .tint(Color.brandNavy)
+                            .accessibilityLabel("Checking message")
+                    } else {
+                        Label("Check Message", systemImage: "text.magnifyingglass")
                     }
                 }
+                .buttonStyle(.brandPrimary)
                 .disabled(!viewModel.canCheck)
             }
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets())
         }
         .gradientList()
         .navigationTitle("Scan a Screenshot")
