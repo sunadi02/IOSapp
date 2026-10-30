@@ -15,10 +15,10 @@ struct MessageScannerTests {
     private func makeScanner(
         threats: [String] = [],
         error: Error? = nil,
-        classifier: MockScamClassifier = MockScamClassifier()
+        classifier: MockScamClassifier? = nil
     ) -> MessageScanner {
         let reputation = MockReputationChecker(foundThreats: threats, error: error)
-        return MessageScanner(classifier: classifier, linkScanner: LinkScanner(reputation: reputation))
+        return MessageScanner(classifier: classifier ?? MockScamClassifier(), linkScanner: LinkScanner(reputation: reputation))
     }
 
     @Test(arguments: ["", "   \n  "])

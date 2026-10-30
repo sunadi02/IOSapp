@@ -7,6 +7,7 @@
 
 import Testing
 import Foundation
+import CoreSpotlight
 @testable import ScamShield
 
 //records what would have been put into iOS search
