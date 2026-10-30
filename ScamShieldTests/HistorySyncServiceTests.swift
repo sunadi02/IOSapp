@@ -170,6 +170,45 @@ struct HistorySyncServiceTests {
         #expect(remote.stored.isEmpty)
     }
 
+    @Test func prepareForSignOutUploadsPendingScans() async throws {
+        let pending = scan("a.com")
+        try local.save(pending)
+
+        let remaining = await service.prepareForSignOut()
+        #expect(remaining == 0)
+        #expect(remote.stored.map(\.id) == [pending.id])
+    }
+
+    @Test func prepareForSignOutNeverUploadsScreenshots() async throws {
+        let screenshot = ScanResult(type: .screenshot, input: "Your OTP is 1234", riskLevel: .risky, trustScore: 20)
+        try local.save(screenshot)
+
+        let remaining = await service.prepareForSignOut()
+        #expect(remaining == 0)
+        #expect(remote.stored.isEmpty)
+    }
+
+    @Test func prepareForSignOutReportsScansThatFailedToUpload() async throws {
+        remote.uploadError = URLError(.notConnectedToInternet)
+        try local.save(scan("a.com"))
+        try local.save(scan("b.com"))
+
+        let remaining = await service.prepareForSignOut()
+        #expect(remaining == 2)
+        #expect(remote.stored.isEmpty)
+    }
+
+    @Test func prepareForSignOutSendsPendingDeletes() async throws {
+        let doomed = scan("a.com")
+        remote.stored = [doomed]
+        service.queueDeletes([doomed.id])
+
+        let remaining = await service.prepareForSignOut()
+        #expect(remaining == 0)
+        #expect(service.pendingDeletes.isEmpty)
+        #expect(remote.stored.isEmpty)
+    }
+
     @Test func signingOutClearsThisDeviceOnly() throws {
         try saveSynced(scan("a.com"))
         service.queueDeletes([UUID()])

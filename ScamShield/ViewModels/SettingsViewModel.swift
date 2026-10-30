@@ -15,6 +15,14 @@ final class SettingsViewModel {
     private(set) var errorMessage: String?
     private(set) var alertsMessage: String?
     private(set) var exportFile: HistoryExportFile?
+    private(set) var isSigningOut = false
+    private(set) var unsavedScanCount = 0
+    var showsUnsavedWarning = false
+
+    var unsavedWarningMessage: String {
+        let scans = unsavedScanCount == 1 ? "1 link or QR scan hasn't" : "\(unsavedScanCount) link or QR scans haven't"
+        return "\(scans) been saved to your account yet, possibly because you are offline. If you sign out now they will be deleted from this phone."
+    }
 
     private let history: HistoryStoring
     private let notifications: NotificationScheduling
@@ -52,6 +60,15 @@ final class SettingsViewModel {
     func prepareExport() {
         let scans = (try? history.fetchAll()) ?? []
         exportFile = scans.isEmpty ? nil : HistoryExportFile(text: HistoryExporter.csv(for: scans))
+    }
+
+    func prepareSignOut(using sync: HistorySyncService) async -> Bool {
+        isSigningOut = true
+        defer { isSigningOut = false }
+
+        unsavedScanCount = await sync.prepareForSignOut()
+        showsUnsavedWarning = unsavedScanCount > 0
+        return unsavedScanCount == 0
     }
 
     //returns the value the alerts toggle should show once permission is known

@@ -63,7 +63,8 @@ final class AppServices {
                     sync.didSignOut()
                     //the next person to sign in on this device must not find the last one's scans in search
                     searchIndex.removeAll()
-                } else {
+                } else if let user {
+                    await FirestoreUserProfile.save(user)
                     await sync.sync()
                 }
             }

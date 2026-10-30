@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 
 //protocol so syncing can be tested without firestore
 protocol RemoteHistoryStoring {
@@ -23,6 +24,7 @@ final class HistorySyncService {
     }
 
     static let pendingDeletesKey = "pendingRemoteDeletes"
+    static let log = Logger(subsystem: "sunadi.ScamShield", category: "Sync")
 
     private let local: HistoryStoring
     private let remote: RemoteHistoryStoring
@@ -63,6 +65,28 @@ final class HistorySyncService {
         wantsPush = true
         wantsPull = true
         await drain()
+    }
+
+    func pendingUploadCount() -> Int {
+        let unsynced = (try? local.fetchUnsynced()) ?? []
+        return unsynced.filter { $0.type != .screenshot }.count
+    }
+
+    func prepareForSignOut(timeout: Double = 8) async -> Int {
+        guard pendingUploadCount() > 0 || !pendingDeletes.isEmpty else { return 0 }
+
+        _ = await Timeout.run(after: timeout) { [self] in
+            await push()
+            await waitUntilIdle()
+            return true
+        }
+        return pendingUploadCount()
+    }
+
+    private func waitUntilIdle() async {
+        while isRunning {
+            try? await Task.sleep(for: .milliseconds(200))
+        }
     }
 
     //the cloud keeps the history so the next account on this device starts clean
@@ -117,6 +141,7 @@ final class HistorySyncService {
             try await remote.delete(ids: Array(pending), userID: userID)
             storePending(pendingDeletes.subtracting(pending))
         } catch {
+            Self.log.error("Deleting scans from the cloud failed: \(error.localizedDescription)")
             return
         }
     }
@@ -132,13 +157,21 @@ final class HistorySyncService {
             try await remote.upsert(shareable, userID: userID)
             try local.markSynced(ids: shareable.map(\.id))
         } catch {
+            Self.log.error("Uploading scans failed: \(error.localizedDescription)")
             return
         }
     }
 
     private func pullRemote(userID: String) async {
-        guard let remoteScans = try? await remote.fetchAll(userID: userID),
-              let localScans = try? local.fetchAll(),
+        let remoteScans: [ScanResult]
+        do {
+            remoteScans = try await remote.fetchAll(userID: userID)
+        } catch {
+            Self.log.error("Pulling scans failed: \(error.localizedDescription)")
+            return
+        }
+
+        guard let localScans = try? local.fetchAll(),
               let unsynced = try? local.fetchUnsynced() else { return }
 
         let plan = Self.mergePlan(

@@ -93,6 +93,7 @@ struct FirebaseAuthService: AuthServicing {
             let change = result.user.createProfileChangeRequest()
             change.displayName = name
             try await change.commitChanges()
+            await FirestoreUserProfile.save(result.user)
 
             return AppUser(id: result.user.uid, email: email, displayName: name)
         } catch {
@@ -115,6 +116,7 @@ struct FirebaseAuthService: AuthServicing {
             let change = user.createProfileChangeRequest()
             change.displayName = name
             try await change.commitChanges()
+            await FirestoreUserProfile.save(user)
             return AppUser(id: user.uid, email: user.email ?? "", displayName: name)
         } catch {
             throw AuthError(error)
