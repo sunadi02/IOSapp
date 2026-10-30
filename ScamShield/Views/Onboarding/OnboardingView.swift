@@ -73,7 +73,6 @@ struct OnboardingView: View {
             }
             .frame(maxWidth: 600)
         }
-        .preferredColorScheme(.dark)
     }
 
     private var pageDots: some View {

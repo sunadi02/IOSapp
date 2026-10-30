@@ -10,11 +10,16 @@ import SwiftUI
 struct DashboardView: View {
 
     @Environment(AuthViewModel.self) private var auth
+    @Environment(AppServices.self) private var services
+    @Environment(AppLockViewModel.self) private var lock
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var viewModel = DashboardViewModel()
     @State private var clipboard = ClipboardLinkViewModel()
     @State private var copiedLink: String?
+    @State private var isShowingScanMenu = false
+    @State private var chosenScan: AppSection?
+    @State private var openedScan: AppSection?
 
     var body: some View {
         ScrollView {
@@ -31,7 +36,7 @@ struct DashboardView: View {
                     .transition(.opacity)
                 }
 
-                stats
+                scanArea
 
                 WeeklyChartCard(
                     breakdown: viewModel.weeklyBreakdown,
@@ -47,9 +52,23 @@ struct DashboardView: View {
             .frame(maxWidth: .infinity)
             .animation(reduceMotion ? nil : .default, value: clipboard.showsCard)
         }
+        .sheet(isPresented: $isShowingScanMenu, onDismiss: openChosenScan) {
+            ScanMenuSheet { section in
+                chosenScan = section
+                isShowingScanMenu = false
+            }
+            .presentationDetents([.height(260), .large])
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(32)
+            .presentationBackground(.regularMaterial)
+        }
+        .navigationDestination(item: $openedScan) { section in
+            scanScreen(for: section)
+        }
         .appBackground()
         .navigationTitle("ScamShield")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.visible, for: .navigationBar)
         .navigationDestination(for: ScanResult.self) { scan in
             ResultView(result: scan)
         }
@@ -67,18 +86,39 @@ struct DashboardView: View {
         }
     }
 
-    private var stats: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 12) { statCards }
-            VStack(spacing: 12) { statCards }
+    private func openChosenScan() {
+        openedScan = chosenScan
+        chosenScan = nil
+    }
+
+    @ViewBuilder
+    private func scanScreen(for section: AppSection) -> some View {
+        switch section {
+        case .checkLink: CheckLinkView()
+        case .scanQR: QRScannerView()
+        case .scanScreenshot: ScreenshotScanView()
+        default: EmptyView()
+        }
+    }
+
+    private var scanArea: some View {
+        VStack(spacing: 24) {
+            ScanRingButton { isShowingScanMenu = true }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 8)
+
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) { statTiles }
+                VStack(spacing: 10) { statTiles }
+            }
         }
     }
 
     @ViewBuilder
-    private var statCards: some View {
-        StatCard(title: "Scans today", value: viewModel.scansToday, systemImage: "magnifyingglass", color: .blue)
-        StatCard(title: "Risky today", value: viewModel.riskyToday, systemImage: "xmark.shield.fill", color: .red)
-        StatCard(title: "Total scans", value: viewModel.totalScans, systemImage: "clock.fill", color: .indigo)
+    private var statTiles: some View {
+        StatTile(title: "Scans today", value: viewModel.scansToday, color: .accentColor)
+        StatTile(title: "Risky today", value: viewModel.riskyToday, color: .red)
+        StatTile(title: "Total scans", value: viewModel.totalScans, color: .primary)
     }
 
     private var heroSubtitle: String {
@@ -89,46 +129,53 @@ struct DashboardView: View {
     }
 
     private var hero: some View {
-        HStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 8) {
-                BrandAccentBar()
-                Text(viewModel.greeting(name: auth.user?.displayName))
-                    .font(.title2.bold())
-                    .foregroundStyle(.white)
-                    .accessibilityAddTraits(.isHeader)
-                Text(heroSubtitle)
-                    .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.85))
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .center, spacing: 16) {
+                VStack(alignment: .leading, spacing: 6) {
+                    BrandAccentBar()
+                    Text(viewModel.greeting(name: auth.user?.displayName))
+                        .font(.title2.bold())
+                        .foregroundStyle(.white)
+                        .accessibilityAddTraits(.isHeader)
+                    Text(heroSubtitle)
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.85))
+                }
+                .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+                BrandEmblem(systemImage: BrandEmblem.appLogo, size: 40)
             }
-            Spacer(minLength: 0)
-            Image(systemName: "checkmark.shield.fill")
-                .font(.system(size: 44))
-                .foregroundStyle(Color.brandCyan)
-                .shadow(color: .brandCyan.opacity(0.6), radius: 14)
-                .accessibilityHidden(true)
+
+            protectionChips
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background {
-            ZStack {
-                LinearGradient.brand
-                Circle()
-                    .fill(Color.brandCyan.opacity(0.2))
-                    .frame(width: 180, height: 180)
-                    .blur(radius: 40)
-                    .offset(x: 120, y: 60)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(LinearGradient.brand, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.white.opacity(0.15), lineWidth: 0.5)
+        )
+    }
+
+    private var protectionChips: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 8) { chips }
+            VStack(alignment: .leading, spacing: 8) { chips }
         }
-        .shadow(color: .brandBlue.opacity(0.35), radius: 14, y: 6)
-        .accessibilityElement(children: .combine)
+    }
+
+    @ViewBuilder
+    private var chips: some View {
+        let isOnline = services.network.isOnline
+        let hasModel = ScamClassifier.shared.isAvailable
+        ProtectionChip(title: isOnline ? "Online check" : "Offline", systemImage: isOnline ? "globe" : "wifi.slash", isActive: isOnline)
+        ProtectionChip(title: hasModel ? "On-device AI" : "AI not installed", systemImage: "cpu", isActive: hasModel)
+        ProtectionChip(title: lock.isEnabled ? "App lock on" : "App lock off", systemImage: lock.isEnabled ? "lock.fill" : "lock.open", isActive: lock.isEnabled)
     }
 
     private var quickActions: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Quick actions")
-                .font(.title3.bold())
-                .accessibilityAddTraits(.isHeader)
+            BrandSectionHeader(title: "Quick actions")
 
             NavigationLink {
                 CheckLinkView()
@@ -154,9 +201,7 @@ struct DashboardView: View {
     @ViewBuilder
     private var recentScans: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Recent scans")
-                .font(.title3.bold())
-                .accessibilityAddTraits(.isHeader)
+            BrandSectionHeader(title: "Recent scans")
 
             if let error = viewModel.loadError {
                 VStack(alignment: .leading, spacing: 8) {
@@ -183,7 +228,7 @@ struct DashboardView: View {
                         .hoverEffect(.highlight)
 
                         if scan.id != viewModel.recentScans.last?.id {
-                            Divider().padding(.leading, 56)
+                            Divider().padding(.leading, 64)
                         }
                     }
                 }
@@ -193,36 +238,30 @@ struct DashboardView: View {
     }
 }
 
-struct StatCard: View {
+struct StatTile: View {
     let title: String
     let value: Int
-    let systemImage: String
     let color: Color
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image(systemName: systemImage)
-                .foregroundStyle(color)
-                .font(.title3)
-                .frame(width: 40, height: 40)
-                .background(color.opacity(0.15), in: Circle())
-                .accessibilityHidden(true)
+        VStack(alignment: .leading, spacing: 4) {
             Text("\(value)")
                 .font(.title.bold())
+                .foregroundStyle(color)
                 .contentTransition(.numericText(value: Double(value)))
                 .animation(reduceMotion ? nil : .default, value: value)
             Text(title)
-                .font(.subheadline)
+                .font(.footnote)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
-                .minimumScaleFactor(0.85)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .frame(maxWidth: .infinity, minHeight: 0, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .cardBackground()
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(title): \(value)")
     }
 }
@@ -232,11 +271,11 @@ struct QuickActionRow: View {
     let subtitle: String
     let systemImage: String
 
-    @ScaledMetric(relativeTo: .title2) private var iconSize = 48
+    @ScaledMetric(relativeTo: .headline) private var iconSize = 36
 
     var body: some View {
         HStack(spacing: 16) {
-            BrandIconTile(systemImage: systemImage, size: iconSize)
+            BrandIconCircle(systemImage: systemImage, size: iconSize)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.headline)
@@ -256,9 +295,28 @@ struct QuickActionRow: View {
     }
 }
 
+struct ProtectionChip: View {
+    let title: String
+    let systemImage: String
+    let isActive: Bool
+
+    var body: some View {
+        Label(title, systemImage: systemImage)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(Color.white.opacity(isActive ? 0.18 : 0.08), in: Capsule())
+            .overlay(Capsule().stroke(isActive ? Color.brandCyan.opacity(0.6) : Color.white.opacity(0.2), lineWidth: 0.5))
+            .accessibilityLabel(title)
+    }
+}
+
 #Preview {
     NavigationStack {
         DashboardView()
     }
     .environment(AuthViewModel(service: PreviewAuthService()))
+    .environment(AppServices())
+    .environment(AppLockViewModel())
 }

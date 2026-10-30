@@ -93,7 +93,6 @@ struct AuthView: View {
             }
             .scrollDismissesKeyboard(.interactively)
         }
-        .preferredColorScheme(.dark)
         .animation(.default, value: auth.mode)
         .announceWhenSet(auth.errorMessage)
         .announceWhenSet(auth.infoMessage)
@@ -105,7 +104,8 @@ struct AuthView: View {
 
     private var header: some View {
         VStack(spacing: 12) {
-            BrandEmblem(systemImage: "shield.lefthalf.filled", size: logoSize)
+            BrandEmblem(systemImage: BrandEmblem.appLogo, size: logoSize)
+                .floating()
                 .padding(.bottom, 20)
             Text("ScamShield")
                 .font(.largeTitle.bold())

@@ -13,13 +13,15 @@ struct OfflineBanner: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "wifi.slash")
                 .font(.title3)
+                .foregroundStyle(.orange)
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("You are offline")
                     .font(.subheadline.bold())
                 Text("Links are checked with on-device rules only. Your history syncs when you are back online.")
-                    .font(.caption)
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.85))
             }
 
             Spacer(minLength: 0)
@@ -27,7 +29,14 @@ struct OfflineBanner: View {
         .padding(.horizontal)
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.orange.opacity(0.22))
+        .foregroundStyle(.white)
+        .background(Color.brandNavy.opacity(0.85))
+        .background(.thinMaterial)
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(Color.white.opacity(0.15))
+                .frame(height: 0.5)
+        }
         .accessibilityElement(children: .combine)
     }
 }

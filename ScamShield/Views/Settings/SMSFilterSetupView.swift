@@ -30,15 +30,15 @@ struct SMSFilterSetupView: View {
                 Text("ScamShield can move suspicious texts from people who are not in your contacts to Junk, before you see them.")
             }
 
-            Section("Turn it on") {
-                Label("Open the Settings app", systemImage: "1.circle.fill")
-                Label("Tap Messages, then Unknown & Spam", systemImage: "2.circle.fill")
-                Label("Turn on Filter Unknown Senders", systemImage: "3.circle.fill")
-                Label("Under SMS Filtering, choose ScamShield", systemImage: "4.circle.fill")
-
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    Link("Open iOS Settings", destination: url)
-                }
+            Section {
+                Label("Open the Settings app from your Home Screen", systemImage: "1.circle.fill")
+                Label("Tap Apps, then Messages", systemImage: "2.circle.fill")
+                Label("Scroll to Unknown Senders", systemImage: "3.circle.fill")
+                Label("Tap Text Message Filter and choose ScamShield", systemImage: "4.circle.fill")
+            } header: {
+                Text("Turn it on")
+            } footer: {
+                Text("On some iOS versions this is under Messages, then Unknown & Spam, then SMS Filtering.")
             }
 
             Section {

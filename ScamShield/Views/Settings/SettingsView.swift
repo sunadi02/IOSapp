@@ -108,6 +108,13 @@ struct SettingsView: View {
                 Button("Clear Scan History", systemImage: "trash", role: .destructive) {
                     isConfirmingClear = true
                 }
+                .confirmationDialog("Delete all scan history?", isPresented: $isConfirmingClear, titleVisibility: .visible) {
+                    Button("Delete All", role: .destructive) {
+                        viewModel.clearHistory()
+                    }
+                } message: {
+                    Text("This cannot be undone.")
+                }
             } header: {
                 Text("Data")
             } footer: {
@@ -139,10 +146,28 @@ struct SettingsView: View {
             #endif
 
             Section {
-                Button("Sign Out", role: .destructive) {
-                    isConfirmingSignOut = true
+                if viewModel.isSigningOut {
+                    HStack(spacing: 12) {
+                        ProgressView()
+                        Text("Saving your scans…")
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityElement(children: .combine)
+                } else {
+                    Button("Sign Out", role: .destructive) {
+                        isConfirmingSignOut = true
+                    }
+                    .accessibilityIdentifier(AccessibilityID.signOut)
+                    .confirmationDialog("Sign out of ScamShield?", isPresented: $isConfirmingSignOut, titleVisibility: .visible) {
+                        Button("Sign Out", role: .destructive) {
+                            Task {
+                                if await viewModel.prepareSignOut(using: services.sync) {
+                                    auth.signOut()
+                                }
+                            }
+                        }
+                    }
                 }
-                .accessibilityIdentifier(AccessibilityID.signOut)
             }
         }
         .gradientList()
@@ -165,17 +190,13 @@ struct SettingsView: View {
             EditNameView(currentName: auth.user?.displayName ?? "")
                 .presentationDetents([.medium])
         }
-        .confirmationDialog("Delete all scan history?", isPresented: $isConfirmingClear, titleVisibility: .visible) {
-            Button("Delete All", role: .destructive) {
-                viewModel.clearHistory()
-            }
-        } message: {
-            Text("This cannot be undone.")
-        }
-        .confirmationDialog("Sign out of ScamShield?", isPresented: $isConfirmingSignOut, titleVisibility: .visible) {
-            Button("Sign Out", role: .destructive) {
+        .alert("Some scans aren't saved yet", isPresented: $viewModel.showsUnsavedWarning) {
+            Button("Stay Signed In", role: .cancel) {}
+            Button("Sign Out Anyway", role: .destructive) {
                 auth.signOut()
             }
+        } message: {
+            Text(viewModel.unsavedWarningMessage)
         }
     }
 }

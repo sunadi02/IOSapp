@@ -31,7 +31,7 @@ struct ResultView: View {
             }
             .listRowBackground(result.riskLevel.color.opacity(0.12))
 
-            Section(result.type == .screenshot ? "Message" : "Checked") {
+            Section {
                 if result.type == .screenshot {
                     HighlightedMessage(text: result.input)
                 } else {
@@ -41,6 +41,16 @@ struct ResultView: View {
                 }
                 LabeledContent("Type", value: result.type.title)
                 LabeledContent("Date", value: result.date.formatted(date: .abbreviated, time: .shortened))
+            } header: {
+                Text(result.type == .screenshot ? "Message" : "Checked")
+            } footer: {
+                if result.isDeviceOnly {
+                    VStack(alignment: .leading, spacing: 4) {
+                        DeviceOnlyLabel()
+                        Text("Screenshots and message text never leave this device.")
+                    }
+                    .accessibilityElement(children: .combine)
+                }
             }
 
             Section("Why") {

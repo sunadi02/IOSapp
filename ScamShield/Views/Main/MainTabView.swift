@@ -15,6 +15,8 @@ struct MainTabView: View {
     //lets a scan screen be opened from outside, such as a home screen quick action
     @State private var homePath = NavigationPath()
 
+    @State private var stackIDs: [AppSection: UUID] = [:]
+
     //the scan screens live inside Home on a phone, so they select the Home tab
     private var tabSelection: Binding<AppSection> {
         Binding(get: { selection.compactTab }, set: { selection = $0 })
@@ -29,30 +31,41 @@ struct MainTabView: View {
                         scanScreen(for: section)
                     }
             }
+            .id(stackIDs[.home])
             .tabItem { label(for: .home) }
             .tag(AppSection.home)
 
             NavigationStack {
                 HistoryView()
             }
+            .id(stackIDs[.history])
             .tabItem { label(for: .history) }
             .tag(AppSection.history)
 
             NavigationStack {
                 CommunityView()
             }
+            .id(stackIDs[.community])
             .tabItem { label(for: .community) }
             .tag(AppSection.community)
 
             NavigationStack {
                 SettingsView()
             }
+            .id(stackIDs[.settings])
             .tabItem { label(for: .settings) }
             .tag(AppSection.settings)
         }
         .handlesQuickActions(selection: $selection)
         .onChange(of: selection, initial: true) { _, section in
             openFromHome(section)
+        }
+        .onChange(of: selection.compactTab) { oldTab, newTab in
+            guard oldTab != newTab else { return }
+            if oldTab == .home {
+                homePath = NavigationPath()
+            }
+            stackIDs[oldTab] = UUID()
         }
         //once the scan screen is closed the selection goes back to Home, so the same quick action works again
         .onChange(of: homePath) { _, path in

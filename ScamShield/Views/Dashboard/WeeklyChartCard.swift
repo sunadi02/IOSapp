@@ -17,9 +17,7 @@ struct WeeklyChartCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("This week")
-                .font(.title3.bold())
-                .accessibilityAddTraits(.isHeader)
+            BrandSectionHeader(title: "This week")
 
             Group {
                 if total == 0 {

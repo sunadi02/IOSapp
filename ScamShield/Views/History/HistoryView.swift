@@ -114,6 +114,7 @@ struct HistoryView: View {
             NavigationLink(value: scan) {
                 ScanRow(scan: scan)
             }
+            .brandRow()
         }
     }
 

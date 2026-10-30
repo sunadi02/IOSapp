@@ -8,6 +8,7 @@
 import Foundation
 import FirebaseAuth
 import FirebaseFirestore
+import os
 
 enum CommunityError: LocalizedError, Equatable {
     case notSignedIn
@@ -59,6 +60,8 @@ enum CommunityDomain {
 //reports live in one shared collection, the document id is user and website so each person counts once
 struct FirestoreCommunityService: CommunityReporting {
 
+    static let log = Logger(subsystem: "sunadi.ScamShield", category: "Community")
+
     private var collection: CollectionReference {
         Firestore.firestore().collection("reports")
     }
@@ -86,6 +89,7 @@ struct FirestoreCommunityService: CommunityReporting {
         } catch let error as CommunityError {
             throw error
         } catch {
+            Self.log.error("Reporting \(domain, privacy: .public) failed: \(error.localizedDescription, privacy: .public)")
             throw CommunityError.unavailable
         }
     }

@@ -45,6 +45,12 @@ struct LockView: View {
                     .buttonStyle(.brandPrimary)
                     .disabled(lock.isAuthenticating)
                     .padding(.top, 8)
+
+                    if lock.kind != .passcodeOnly {
+                        Text("If \(lock.methodName) doesn't work, you can enter your iPhone passcode instead.")
+                            .font(.footnote)
+                            .foregroundStyle(.white.opacity(0.75))
+                    }
                 }
                 .multilineTextAlignment(.center)
                 .padding(32)
@@ -53,8 +59,17 @@ struct LockView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .preferredColorScheme(.dark)
         .accessibilityAddTraits(.isModal)
+    }
+}
+
+struct PrivacyCover: View {
+    var body: some View {
+        ZStack {
+            BrandBackground()
+            BrandEmblem(systemImage: BrandEmblem.appLogo, size: 96)
+        }
+        .accessibilityHidden(true)
     }
 }
 

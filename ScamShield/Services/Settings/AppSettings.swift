@@ -30,9 +30,9 @@ enum AppearanceMode: String, CaseIterable, Identifiable {
         }
     }
 
-    var colorScheme: ColorScheme? {
+    var interfaceStyle: UIUserInterfaceStyle {
         switch self {
-        case .system: nil
+        case .system: .unspecified
         case .light: .light
         case .dark: .dark
         }

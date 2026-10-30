@@ -76,10 +76,11 @@ struct RiskBadge: View {
     var body: some View {
         Label(level.title, systemImage: level.systemImage)
             .font(.caption.bold())
-            .padding(.horizontal, 8)
+            .padding(.horizontal, 10)
             .padding(.vertical, 4)
             .foregroundStyle(level.color)
             .background(level.color.opacity(0.15), in: Capsule())
+            .overlay(Capsule().stroke(level.color.opacity(0.3), lineWidth: 0.5))
             .accessibilityLabel("Risk level \(level.title)")
     }
 }
@@ -102,7 +103,7 @@ struct TrustScoreRing: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var shownScore: Int?
-    @ScaledMetric(relativeTo: .title) private var size = 96
+    @ScaledMetric(relativeTo: .title) private var size = 128
 
     private var displayedScore: Int {
         shownScore ?? ResultMotion.startingScore(for: score, reduceMotion: reduceMotion)
@@ -111,20 +112,23 @@ struct TrustScoreRing: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(color.opacity(0.2), lineWidth: 10)
+                .stroke(color.opacity(0.18), lineWidth: 12)
             Circle()
                 .trim(from: 0, to: CGFloat(displayedScore) / 100)
-                .stroke(color, style: StrokeStyle(lineWidth: 10, lineCap: .round))
+                .stroke(color, style: StrokeStyle(lineWidth: 12, lineCap: .round))
                 .rotationEffect(.degrees(-90))
-            VStack(spacing: 0) {
+            VStack(spacing: 2) {
                 Text("\(displayedScore)")
-                    .font(.title.bold())
+                    .font(.largeTitle.bold())
                     .monospacedDigit()
                     .contentTransition(.numericText(value: Double(displayedScore)))
-                Text("/ 100")
-                    .font(.caption)
+                Text("TRUST SCORE")
+                    .font(.caption2.weight(.semibold))
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
             }
+            .padding(16)
         }
         .frame(width: size, height: size)
         .accessibilityElement(children: .ignore)
